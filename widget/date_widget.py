@@ -84,6 +84,7 @@ class date_widget(QTabWidget):
         self.setCurrentIndex(self.indexOf(self.tab_7))
 
         file_path = getattr(self.main_window, 'uploaded_file_path', None)
+        print(file_path)
 
         # ✅ 无论是否有 file_path，都刷新表格
         if file_path and os.path.exists(file_path):
@@ -126,7 +127,7 @@ class date_widget(QTabWidget):
     def set_global_path(self, index):
         row = index.row()
         model = self.tableView.model()
-        file_path_item = model.item(row, 3)  # 第3列是文件路径
+        file_path_item = model.item(row, 5)  # 第5列是文件路径
         if file_path_item:
             file_path = file_path_item.text()
             if self.main_window:
@@ -159,31 +160,32 @@ class date_widget(QTabWidget):
         except Exception as e:
             QMessageBox.critical(self, "异常", str(e))
 
-    # 展示table
     def show_table(self, data):
         model = QStandardItemModel()
-        model.setHorizontalHeaderLabels(['time', 'amplitude', '文件名', '文件路径'])
+        model.setHorizontalHeaderLabels(['time', 'channel_1', 'channel_2', 'channel_3', '文件名', '文件路径'])
 
         for row in data:
             time_str = ", ".join(str(x) for x in row.get('time', []))
-            amplitude_str = ", ".join(str(x) for x in row.get('amplitude', []))
+            ch1_str = ", ".join(str(x) for x in row.get('channel_1', []))
+            ch2_str = ", ".join(str(x) for x in row.get('channel_2', []))
+            ch3_str = ", ".join(str(x) for x in row.get('channel_3', []))
             filename = row.get('filename', '')
             file_path = row.get('file_path', '')
 
             row_items = [
                 QStandardItem(time_str),
-                QStandardItem(amplitude_str),
+                QStandardItem(ch1_str),
+                QStandardItem(ch2_str),
+                QStandardItem(ch3_str),
                 QStandardItem(filename),
                 QStandardItem(file_path)
             ]
             model.appendRow(row_items)
 
         self.tableView.setModel(model)
-
-        # 隐藏最后一列（文件路径列）
-        self.tableView.setColumnHidden(3, True)
-
-        # 绑定点击事件
+        # 隐藏第 4 列（文件名）和第 5 列（文件路径）
+        self.tableView.setColumnHidden(4, True)
+        self.tableView.setColumnHidden(5, True)
         self.tableView.clicked.connect(self.set_global_path)
 
     # 响应关闭
