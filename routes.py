@@ -98,6 +98,292 @@ def draw_waterfall():
         print(str(e))
         return '500'
 
+# @routes.route('/upload', methods=['POST'])
+# def upload_file():
+#     if 'file' not in request.files:
+#         return jsonify({'error': 'No file part'}), 400
+#
+#     file = request.files['file']
+#     if file.filename == '':
+#         return jsonify({'error': 'No selected file'}), 400
+#
+#     filename = file.filename
+#     upload_time = datetime.utcnow()
+#
+#     try:
+#         if filename.lower().endswith('.txt'):
+#             stream = io.StringIO(file.stream.read().decode('utf-8'))
+#             df = pd.read_csv(stream, delimiter='\t')
+#         elif filename.lower().endswith('.xlsx'):
+#             df = pd.read_excel(file)
+#         else:
+#             return jsonify({'error': 'Unsupported file type'}), 400
+#
+#         if 'time' not in df.columns or 'amplitude' not in df.columns:
+#             return jsonify({'error': 'Missing required columns: time, amplitude'}), 400
+#
+#         time_list = df['time'].tolist()
+#         amplitude_list = df['amplitude'].tolist()
+#
+#         save_path = os.path.join(UPLOAD_DIR, filename)
+#         file.seek(0)
+#         file.save(save_path)
+#
+#         record = UploadedData(
+#             filename=filename,
+#             upload_time=upload_time,
+#             file_path=save_path,
+#             time_list=json.dumps(time_list),
+#             amplitude_list=json.dumps(amplitude_list)
+#         )
+#
+#         db.session.add(record)
+#         db.session.commit()
+#
+#         return jsonify({'message': '文件上传成功', 'id': record.id}), 200
+#
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({'error': str(e)}), 500
+#
+#
+# @routes.route('/upload_path', methods=['POST'])
+# def upload_by_path():
+#     try:
+#         data = request.get_json()
+#         file_path = data.get('file_path')
+#
+#         if not file_path or not os.path.exists(file_path):
+#             return jsonify({'error': '路径无效或文件不存在'}), 400
+#
+#         filename = os.path.basename(file_path)
+#         upload_time = datetime.utcnow()
+#
+#         if filename.lower().endswith('.txt'):
+#             df = pd.read_csv(file_path, delimiter='\t')
+#         elif filename.lower().endswith('.xlsx'):
+#             df = pd.read_excel(file_path)
+#         else:
+#             return jsonify({'error': '不支持的文件类型'}), 400
+#
+#         if 'time' not in df.columns or 'amplitude' not in df.columns:
+#             return jsonify({'error': '缺少必要列：time, amplitude'}), 400
+#
+#         time_list = df['time'].tolist()
+#         amplitude_list = df['amplitude'].tolist()
+#
+#         # 复制文件到统一上传目录
+#         save_path = os.path.join(UPLOAD_DIR, filename)
+#         if file_path != save_path:
+#             import shutil
+#             shutil.copy(file_path, save_path)
+#
+#         # 插入数据库
+#         record = UploadedData(
+#             filename=filename,
+#             upload_time=upload_time,
+#             file_path=save_path,
+#             time_list=json.dumps(time_list),
+#             amplitude_list=json.dumps(amplitude_list)
+#         )
+#         db.session.add(record)
+#         db.session.commit()
+#
+#         return jsonify({'message': '路径上传成功', 'id': record.id}), 200
+#
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({'error': str(e)}), 500
+#
+#
+#
+# @routes.route('/search_all', methods=['GET'])
+# def search_all():
+#     try:
+#         records = UploadedData.query.all()
+#         data = []
+#         for r in records:
+#             time_list = json.loads(r.time_list)
+#             amplitude_list = json.loads(r.amplitude_list)
+#
+#             data.append({
+#                 'id': r.id,
+#                 'filename': r.filename,
+#                 'upload_time': r.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
+#                 'file_path': r.file_path,
+#                 'time': time_list[:3],         # 截取前3个
+#                 'amplitude': amplitude_list[:3]
+#             })
+#         return jsonify({'data': data}), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+#
+# @routes.route('/search', methods=['GET'])
+# def search():
+#     try:
+#         id_val = request.args.get('id', type=int)
+#         filename_val = request.args.get('filename', type=str)
+#
+#         query = UploadedData.query
+#
+#         if id_val is not None:
+#             query = query.filter(UploadedData.id == id_val)
+#         if filename_val:
+#             query = query.filter(UploadedData.filename.like(f"%{filename_val}%"))
+#
+#         records = query.all()
+#
+#         data = []
+#         for r in records:
+#             # 解析JSON字符串成列表
+#             time_list = json.loads(r.time_list)
+#             amplitude_list = json.loads(r.amplitude_list)
+#
+#             # 截取前3个元素，避免列表过长
+#             time_preview = time_list[:3]
+#             amplitude_preview = amplitude_list[:3]
+#
+#             data.append({
+#                 'id': r.id,
+#                 'filename': r.filename,
+#                 'upload_time': r.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
+#                 'file_path': r.file_path,
+#                 'time': time_preview,
+#                 'amplitude': amplitude_preview
+#             })
+#
+#         return jsonify({'data': data}), 200
+#
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+#
+# @routes.route('/generate_report', methods=['POST'])
+# def generate_report():
+#     try:
+#         data = request.json
+#         file_path = data.get('file_path')
+#         save_path = data.get('save_path')
+#
+#         if not file_path or not os.path.exists(file_path):
+#             return jsonify({'error': '无效的文件路径'}), 400
+#
+#         if not save_path or not os.path.isdir(save_path):
+#             return jsonify({'error': '保存路径无效或不存在'}), 400
+#
+#         filename = os.path.basename(file_path)
+#
+#         # 用 filename 查询数据库记录
+#         record = UploadedData.query.filter(UploadedData.filename == filename).first()
+#         if not record:
+#             return jsonify({'error': f'未找到文件名为 {filename} 的记录'}), 404
+#
+#         # 获取数据字段
+#         import json
+#         time_list = json.loads(record.time_list)
+#         amplitude_list = json.loads(record.amplitude_list)
+#
+#         N = 20  # 展示前N个
+#         context = {
+#             'id': record.id,
+#             'filename': record.filename,
+#             'upload_time': record.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
+#             'file_path': record.file_path,
+#             'time_str': ', '.join(map(str, time_list[:N])),
+#             'amplitude_str': ', '.join(map(str, amplitude_list[:N])),
+#             'time_min': min(time_list),
+#             'time_max': max(time_list),
+#             'amplitude_min': min(amplitude_list),
+#             'amplitude_max': max(amplitude_list),
+#             'N': N,
+#         }
+#
+#         # 渲染文档
+#         template_path = 'report_template.docx'
+#         if not os.path.exists(template_path):
+#             return jsonify({'error': '报告模板不存在'}), 500
+#
+#         doc = DocxTemplate(template_path)
+#         doc.render(context)
+#
+#         filename_out = f"report_id{record.id}.docx"
+#         full_path = os.path.join(save_path, filename_out)
+#         doc.save(full_path)
+#
+#         return jsonify({'message': '报告生成成功', 'file_path': full_path}), 200
+#
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+#
+# @routes.route('/generate_and_print_report', methods=['POST'])
+# def generate_and_print_report():
+#     try:
+#         data = request.json
+#         file_path = data.get('file_path')
+#         save_path = data.get('save_path')
+#         print(file_path)
+#         print(save_path)
+#
+#         # 1. 校验路径
+#         if not file_path or not os.path.exists(file_path):
+#             return jsonify({'error': '无效的文件路径'}), 400
+#         if not save_path or not os.path.isdir(save_path):
+#             return jsonify({'error': '保存路径无效或不存在'}), 400
+#
+#         filename = os.path.basename(file_path)
+#         print("filename:",filename)
+#
+#         # 2. 查询数据库记录
+#         record = UploadedData.query.filter(UploadedData.filename == filename).first()
+#         if not record:
+#             return jsonify({'error': f'未找到文件名为 {filename} 的记录'}), 404
+#
+#         time_list = json.loads(record.time_list)
+#         amplitude_list = json.loads(record.amplitude_list)
+#
+#         N = 20
+#         context = {
+#             'id': record.id,
+#             'filename': record.filename,
+#             'upload_time': record.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
+#             'file_path': record.file_path,
+#             'time_str': ', '.join(map(str, time_list[:N])),
+#             'amplitude_str': ', '.join(map(str, amplitude_list[:N])),
+#             'time_min': min(time_list),
+#             'time_max': max(time_list),
+#             'amplitude_min': min(amplitude_list),
+#             'amplitude_max': max(amplitude_list),
+#             'N': N,
+#         }
+#
+#         # 3. 加载并渲染 Word 模板
+#         template_path = 'report_template.docx'
+#         if not os.path.exists(template_path):
+#             return jsonify({'error': '报告模板不存在'}), 500
+#
+#         doc = DocxTemplate(template_path)
+#         doc.render(context)
+#
+#         filename_out = f"report_id{record.id}.docx"
+#         full_report_path = os.path.join(save_path, filename_out)
+#         doc.save(full_report_path)
+#         print("已保存word")
+#
+#         # 4. 打印 Word 报告
+#         pythoncom.CoInitialize()
+#         word = win32com.client.Dispatch("Word.Application")
+#         word.Visible = False
+#
+#         docx = word.Documents.Open(full_report_path)
+#         docx.PrintOut()
+#         docx.Close(False)
+#         print("已打印")
+#         word.Quit()
+#
+#         return jsonify({'message': '报告生成并打印成功', 'file_path': full_report_path}), 200
+#
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
 @routes.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -116,14 +402,23 @@ def upload_file():
             df = pd.read_csv(stream, delimiter='\t')
         elif filename.lower().endswith('.xlsx'):
             df = pd.read_excel(file)
+        elif filename.lower().endswith('.csv'):
+            stream = io.StringIO(file.stream.read().decode('utf-8'))
+            df = pd.read_csv(stream)  # 默认逗号分隔
         else:
             return jsonify({'error': 'Unsupported file type'}), 400
 
-        if 'time' not in df.columns or 'amplitude' not in df.columns:
-            return jsonify({'error': 'Missing required columns: time, amplitude'}), 400
+        if 'time' not in df.columns:
+            return jsonify({'error': 'Missing required column: time'}), 400
+        required_channels = ['channel_1', 'channel_2', 'channel_3']
+        for ch in required_channels:
+            if ch not in df.columns:
+                return jsonify({'error': f'Missing required channel column: {ch}'}), 400
 
         time_list = df['time'].tolist()
-        amplitude_list = df['amplitude'].tolist()
+        channel_1_list = df['channel_1'].tolist()
+        channel_2_list = df['channel_2'].tolist()
+        channel_3_list = df['channel_3'].tolist()
 
         save_path = os.path.join(UPLOAD_DIR, filename)
         file.seek(0)
@@ -134,7 +429,9 @@ def upload_file():
             upload_time=upload_time,
             file_path=save_path,
             time_list=json.dumps(time_list),
-            amplitude_list=json.dumps(amplitude_list)
+            channel_1_list=json.dumps(channel_1_list),
+            channel_2_list=json.dumps(channel_2_list),
+            channel_3_list=json.dumps(channel_3_list)
         )
 
         db.session.add(record)
@@ -163,28 +460,36 @@ def upload_by_path():
             df = pd.read_csv(file_path, delimiter='\t')
         elif filename.lower().endswith('.xlsx'):
             df = pd.read_excel(file_path)
+        elif filename.lower().endswith('.csv'):
+            df = pd.read_csv(file_path)  # 默认逗号分隔
         else:
             return jsonify({'error': '不支持的文件类型'}), 400
 
-        if 'time' not in df.columns or 'amplitude' not in df.columns:
-            return jsonify({'error': '缺少必要列：time, amplitude'}), 400
+        if 'time' not in df.columns:
+            return jsonify({'error': '缺少必要列：time'}), 400
+        required_channels = ['channel_1', 'channel_2', 'channel_3']
+        for ch in required_channels:
+            if ch not in df.columns:
+                return jsonify({'error': f'缺少必要通道列：{ch}'}), 400
 
         time_list = df['time'].tolist()
-        amplitude_list = df['amplitude'].tolist()
+        channel_1_list = df['channel_1'].tolist()
+        channel_2_list = df['channel_2'].tolist()
+        channel_3_list = df['channel_3'].tolist()
 
-        # 复制文件到统一上传目录
         save_path = os.path.join(UPLOAD_DIR, filename)
         if file_path != save_path:
             import shutil
             shutil.copy(file_path, save_path)
 
-        # 插入数据库
         record = UploadedData(
             filename=filename,
             upload_time=upload_time,
             file_path=save_path,
             time_list=json.dumps(time_list),
-            amplitude_list=json.dumps(amplitude_list)
+            channel_1_list=json.dumps(channel_1_list),
+            channel_2_list=json.dumps(channel_2_list),
+            channel_3_list=json.dumps(channel_3_list)
         )
         db.session.add(record)
         db.session.commit()
@@ -196,7 +501,6 @@ def upload_by_path():
         return jsonify({'error': str(e)}), 500
 
 
-
 @routes.route('/search_all', methods=['GET'])
 def search_all():
     try:
@@ -204,19 +508,24 @@ def search_all():
         data = []
         for r in records:
             time_list = json.loads(r.time_list)
-            amplitude_list = json.loads(r.amplitude_list)
+            channel_1_list = json.loads(r.channel_1_list)
+            channel_2_list = json.loads(r.channel_2_list)
+            channel_3_list = json.loads(r.channel_3_list)
 
             data.append({
                 'id': r.id,
                 'filename': r.filename,
                 'upload_time': r.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
                 'file_path': r.file_path,
-                'time': time_list[:3],         # 截取前3个
-                'amplitude': amplitude_list[:3]
+                'time': time_list[:3],
+                'channel_1': channel_1_list[:3],
+                'channel_2': channel_2_list[:3],
+                'channel_3': channel_3_list[:3],
             })
         return jsonify({'data': data}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @routes.route('/search', methods=['GET'])
 def search():
@@ -235,27 +544,27 @@ def search():
 
         data = []
         for r in records:
-            # 解析JSON字符串成列表
             time_list = json.loads(r.time_list)
-            amplitude_list = json.loads(r.amplitude_list)
-
-            # 截取前3个元素，避免列表过长
-            time_preview = time_list[:3]
-            amplitude_preview = amplitude_list[:3]
+            channel_1_list = json.loads(r.channel_1_list)
+            channel_2_list = json.loads(r.channel_2_list)
+            channel_3_list = json.loads(r.channel_3_list)
 
             data.append({
                 'id': r.id,
                 'filename': r.filename,
                 'upload_time': r.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
                 'file_path': r.file_path,
-                'time': time_preview,
-                'amplitude': amplitude_preview
+                'time': time_list[:3],
+                'channel_1': channel_1_list[:3],
+                'channel_2': channel_2_list[:3],
+                'channel_3': channel_3_list[:3],
             })
 
         return jsonify({'data': data}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @routes.route('/generate_report', methods=['POST'])
 def generate_report():
@@ -272,32 +581,36 @@ def generate_report():
 
         filename = os.path.basename(file_path)
 
-        # 用 filename 查询数据库记录
         record = UploadedData.query.filter(UploadedData.filename == filename).first()
         if not record:
             return jsonify({'error': f'未找到文件名为 {filename} 的记录'}), 404
 
-        # 获取数据字段
-        import json
         time_list = json.loads(record.time_list)
-        amplitude_list = json.loads(record.amplitude_list)
+        channel_1_list = json.loads(record.channel_1_list)
+        channel_2_list = json.loads(record.channel_2_list)
+        channel_3_list = json.loads(record.channel_3_list)
 
-        N = 20  # 展示前N个
+        N = 20
         context = {
             'id': record.id,
             'filename': record.filename,
             'upload_time': record.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
             'file_path': record.file_path,
             'time_str': ', '.join(map(str, time_list[:N])),
-            'amplitude_str': ', '.join(map(str, amplitude_list[:N])),
+            'channel_1_str': ', '.join(map(str, channel_1_list[:N])),
+            'channel_2_str': ', '.join(map(str, channel_2_list[:N])),
+            'channel_3_str': ', '.join(map(str, channel_3_list[:N])),
             'time_min': min(time_list),
             'time_max': max(time_list),
-            'amplitude_min': min(amplitude_list),
-            'amplitude_max': max(amplitude_list),
+            'channel_1_min': min(channel_1_list),
+            'channel_1_max': max(channel_1_list),
+            'channel_2_min': min(channel_2_list),
+            'channel_2_max': max(channel_2_list),
+            'channel_3_min': min(channel_3_list),
+            'channel_3_max': max(channel_3_list),
             'N': N,
         }
 
-        # 渲染文档
         template_path = 'report_template.docx'
         if not os.path.exists(template_path):
             return jsonify({'error': '报告模板不存在'}), 500
@@ -313,32 +626,30 @@ def generate_report():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
+
 @routes.route('/generate_and_print_report', methods=['POST'])
 def generate_and_print_report():
     try:
         data = request.json
         file_path = data.get('file_path')
         save_path = data.get('save_path')
-        print(file_path)
-        print(save_path)
 
-        # 1. 校验路径
         if not file_path or not os.path.exists(file_path):
             return jsonify({'error': '无效的文件路径'}), 400
         if not save_path or not os.path.isdir(save_path):
             return jsonify({'error': '保存路径无效或不存在'}), 400
 
         filename = os.path.basename(file_path)
-        print("filename:",filename)
 
-        # 2. 查询数据库记录
         record = UploadedData.query.filter(UploadedData.filename == filename).first()
         if not record:
             return jsonify({'error': f'未找到文件名为 {filename} 的记录'}), 404
 
         time_list = json.loads(record.time_list)
-        amplitude_list = json.loads(record.amplitude_list)
+        channel_1_list = json.loads(record.channel_1_list)
+        channel_2_list = json.loads(record.channel_2_list)
+        channel_3_list = json.loads(record.channel_3_list)
 
         N = 20
         context = {
@@ -347,15 +658,20 @@ def generate_and_print_report():
             'upload_time': record.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
             'file_path': record.file_path,
             'time_str': ', '.join(map(str, time_list[:N])),
-            'amplitude_str': ', '.join(map(str, amplitude_list[:N])),
+            'channel_1_str': ', '.join(map(str, channel_1_list[:N])),
+            'channel_2_str': ', '.join(map(str, channel_2_list[:N])),
+            'channel_3_str': ', '.join(map(str, channel_3_list[:N])),
             'time_min': min(time_list),
             'time_max': max(time_list),
-            'amplitude_min': min(amplitude_list),
-            'amplitude_max': max(amplitude_list),
+            'channel_1_min': min(channel_1_list),
+            'channel_1_max': max(channel_1_list),
+            'channel_2_min': min(channel_2_list),
+            'channel_2_max': max(channel_2_list),
+            'channel_3_min': min(channel_3_list),
+            'channel_3_max': max(channel_3_list),
             'N': N,
         }
 
-        # 3. 加载并渲染 Word 模板
         template_path = 'report_template.docx'
         if not os.path.exists(template_path):
             return jsonify({'error': '报告模板不存在'}), 500
@@ -366,9 +682,11 @@ def generate_and_print_report():
         filename_out = f"report_id{record.id}.docx"
         full_report_path = os.path.join(save_path, filename_out)
         doc.save(full_report_path)
-        print("已保存word")
 
-        # 4. 打印 Word 报告
+        # 打印 Word 报告
+        import pythoncom
+        import win32com.client
+
         pythoncom.CoInitialize()
         word = win32com.client.Dispatch("Word.Application")
         word.Visible = False
@@ -376,7 +694,6 @@ def generate_and_print_report():
         docx = word.Documents.Open(full_report_path)
         docx.PrintOut()
         docx.Close(False)
-        print("已打印")
         word.Quit()
 
         return jsonify({'message': '报告生成并打印成功', 'file_path': full_report_path}), 200
