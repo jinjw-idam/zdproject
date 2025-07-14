@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1920</width>
+    <height>1080</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>图像视频物体消除</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>16777213</height>
+    </size>
+   </property>
+   <widget class="QTabWidget" name="showWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>521</width>
+      <height>531</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>Tab 1</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="tab_2">
+     <attribute name="title">
+      <string>Tab 2</string>
+     </attribute>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="calculateWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>530</y>
+      <width>521</width>
+      <height>531</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab_3">
+     <attribute name="title">
+      <string>Tab 1</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="tab_4">
+     <attribute name="title">
+      <string>Tab 2</string>
+     </attribute>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="displayWidget">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>0</y>
+      <width>1351</width>
+      <height>531</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <widget class="QWidget" name="tab_7">
+     <attribute name="title">
+      <string>Tab 1</string>
+     </attribute>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>1331</width>
+        <height>421</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>450</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string> I  D :</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>450</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>文件名：</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>450</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_2">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>450</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton">
+      <property name="geometry">
+       <rect>
+        <x>930</x>
+        <y>530</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>查找</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="geometry">
+       <rect>
+        <x>1080</x>
+        <y>530</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>查找全部</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_8">
+     <attribute name="title">
+      <string>Tab 2</string>
+     </attribute>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="fileWidget">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>530</y>
+      <width>1351</width>
+      <height>531</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab_9">
+     <attribute name="title">
+      <string>Tab 1</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="tab_10">
+     <attribute name="title">
+      <string>Tab 2</string>
+     </attribute>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1920</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="actionopen"/>
+    <addaction name="actionout"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>显示</string>
+    </property>
+    <addaction name="actionXY"/>
+    <addaction name="actionwaterfall"/>
+    <addaction name="actionshujuku"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>计算</string>
+    </property>
+    <addaction name="actionfft"/>
+   </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>分析</string>
+    </property>
+    <addaction name="actionshengc"/>
+    <addaction name="actiondayin"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_4"/>
+  </widget>
+  <action name="actionopen">
+   <property name="text">
+    <string>打开</string>
+   </property>
+  </action>
+  <action name="actionout">
+   <property name="text">
+    <string>导出</string>
+   </property>
+  </action>
+  <action name="actionXY">
+   <property name="text">
+    <string>XY</string>
+   </property>
+  </action>
+  <action name="actionfft">
+   <property name="text">
+    <string>fft</string>
+   </property>
+  </action>
+  <action name="actionwaterfall">
+   <property name="text">
+    <string>瀑布图</string>
+   </property>
+  </action>
+  <action name="actionshujuku">
+   <property name="text">
+    <string>数据库</string>
+   </property>
+  </action>
+  <action name="actionshengc">
+   <property name="text">
+    <string>生成报告</string>
+   </property>
+  </action>
+  <action name="actiondayin">
+   <property name="text">
+    <string>打印报告</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
