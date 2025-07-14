@@ -793,7 +793,7 @@ def get_waterfall_info(file_path, n_segments=20, overlap=0.5):
     return X, Y, Z
 
 
-def calculate_cepstrum_routes(channel_data,fs):
+def calculate_cepstrum_routes(channel_data, fs):
     fft_result = fft(channel_data)
     log_spectrum = np.log(np.abs(fft_result) + 1e-10)  # 避免 log(0)
     cepstrum = np.abs(ifft(log_spectrum))  # 实倒谱
@@ -802,3 +802,13 @@ def calculate_cepstrum_routes(channel_data,fs):
     quefrency = np.arange(len(channel_data)) / fs
 
     return quefrency, cepstrum
+
+
+def calculate_all_routes(channel_data):
+    sum_result = np.sum(channel_data)
+    avg_result = np.mean(channel_data)
+    max_result = np.max(channel_data)
+    min_result = np.min(channel_data)
+    rms_result = np.sqrt(np.mean(np.square(channel_data)))
+    return sum_result, avg_result, max_result, min_result, rms_result
+

@@ -52,6 +52,8 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.actionself_composed.triggered.connect(self.calculateWidget.selfcomposed)
         # 倒谱计算
         self.actioncepstrum.triggered.connect(self.calculateWidget.cepstrum)
+        # 数学计算
+        self.actioncalculate_all.triggered.connect(self.calculateWidget.math_calculate)
         # 展示数据库
         # self.actionshujuku.triggered.connect(self.dateWidget.show_database)
         # 生成报告

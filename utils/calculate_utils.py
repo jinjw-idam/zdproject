@@ -11,7 +11,7 @@ from matplotlib.widgets import SpanSelector
 from scipy import signal
 from scipy.fft import fft, fftfreq
 
-from routes import calculate_cepstrum_routes
+from routes import calculate_cepstrum_routes, calculate_all_routes
 from utils.file_utils import *
 
 matplotlib.rc("font", family='Microsoft YaHei')
@@ -32,7 +32,7 @@ def fft_analysis(file_path):
     return xf, amplitude_spectrum
 
 
-def calculate_selfcomposed(file_path, show_widget: QWidget, channel_name):
+def calculate_selfcomposed(file_path, show_widget: QWidget, base_name, channel_name):
     time_list, channel_matrix, channel_names = get_csv_info(file_path)
     channel_index = channel_names.index(channel_name)
     channel_data = channel_matrix[channel_index]
@@ -49,17 +49,18 @@ def calculate_selfcomposed(file_path, show_widget: QWidget, channel_name):
             f"X: {sel.target[0]:.2f}\nY: {sel.target[1]:.2f}"
         )
     )
+    show_widget.save_button.clicked.connect(lambda: save(show_widget.figure, base_name, channel_name, "自谱"))
     show_widget.canvas.draw()
 
 
-def calculate_cepstrum(file_path, show_widget: QWidget, channel_name):
+def calculate_cepstrum(file_path, show_widget: QWidget, base_name, channel_name):
     time_list, channel_matrix, channel_names = get_csv_info(file_path)
     channel_index = channel_names.index(channel_name)
     channel_data = channel_matrix[channel_index]
     fs = 1 / (time_list[1] - time_list[0])
     quefrency, cepstrum = calculate_cepstrum_routes(channel_data, fs)
     ax = show_widget.figure.add_subplot(1, 1, 1)
-    line = ax.plot(quefrency[:len(channel_data)//2], cepstrum[:len(channel_data)//2])
+    line = ax.plot(quefrency[:len(channel_data) // 2], cepstrum[:len(channel_data) // 2])
     ax.set_xlabel('倒频率[s]')
     ax.set_ylabel('倒谱幅值')
     ax.set_title('实倒谱')
@@ -69,10 +70,33 @@ def calculate_cepstrum(file_path, show_widget: QWidget, channel_name):
             f"X: {sel.target[0]:.2f}\nY: {sel.target[1]:.2f}"
         )
     )
+    show_widget.save_button.clicked.connect(lambda: save(show_widget.figure, base_name, channel_name, "倒谱"))
     show_widget.canvas.draw()
 
 
-def create_calculate_widget(need_button=False):
+def calculate_all(file_path, show_widget: QWidget, channel_name):
+    time_list, channel_matrix, channel_names = get_csv_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    channel_data = channel_matrix[channel_index]
+    ax = show_widget.figure.add_subplot(1, 1, 1)
+    line = ax.plot(time_list, channel_data)
+    ax.set_xlabel('时间')
+    ax.set_ylabel('幅度')
+    ax.set_title('时域图')
+    show_widget.cursor = mplcursors.cursor(line, hover=True)
+    show_widget.cursor.connect(
+        "add", lambda sel: sel.annotation.set_text(
+            f"X: {sel.target[0]:.2f}\nY: {sel.target[1]:.2f}"
+        )
+    )
+    sum_result, avg_result, max_result, min_result, rms_result = calculate_all_routes(channel_data)
+    show_widget.info_output_label.setText(f"和:{sum_result:.2f},平均值:{avg_result:.2f},最大值:{max_result:.2f}\n"
+                                          f"最小值:{min_result:.2f},均方根{rms_result:.2f}")
+    show_widget.figure.tight_layout()  # 自动调整布局
+    show_widget.canvas.draw()
+
+
+def create_calculate_widget(need_button=False, need_label=False):
     new_tab = QWidget()  # 创建空白页面（可替换为你的自定义控件）
     new_tab.figure = Figure()
     new_tab.canvas = FigureCanvas(new_tab.figure)
@@ -81,9 +105,28 @@ def create_calculate_widget(need_button=False):
     new_tab.figure.clear()
     new_tab.selected_region = None
     new_tab.span_selector = None
+    if need_label:
+        new_tab.info_output_label = QtWidgets.QLabel()
+        new_tab.info_output_label.setText("")
+        new_tab.info_output_label.setObjectName("info_output_label")
+        new_tab.layout.addWidget(new_tab.info_output_label)  # 将标签添加到布局
     if need_button:
         new_tab.save_button = QPushButton()
         new_tab.save_button.setText("保存数据块")
         new_tab.save_button.setObjectName("save_button")
         new_tab.layout.addWidget(new_tab.save_button)  # 将标签添加到布局
     return new_tab
+
+
+def save(figure, base_name, channel_name, type):
+    # 构建保存路径
+    save_dir = os.path.join('data_block', base_name)
+    save_name = channel_name + '_' +type + '.png'
+    save_path = os.path.join(save_dir, save_name)
+
+    # 确保目录存在（如果不存在则创建）
+    os.makedirs(save_dir, exist_ok=True)
+
+    # 保存图形
+    figure.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"图片已保存至: {save_path}")
