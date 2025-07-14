@@ -21,12 +21,11 @@ import os
 from flask import jsonify, request
 from docxtpl import DocxTemplate
 from docx2pdf import convert
-from scipy.fft import fft, fftfreq
+from scipy.fft import fft, fftfreq, ifft
 from models import db, UploadedData
 from utils.file_utils import get_info
 
 routes = Blueprint('routes', __name__)
-
 
 UPLOAD_DIR = 'static/uploaded_files'
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -97,6 +96,7 @@ def draw_waterfall():
     except Exception as e:
         print(str(e))
         return '500'
+
 
 # @routes.route('/upload', methods=['POST'])
 # def upload_file():
@@ -793,9 +793,12 @@ def get_waterfall_info(file_path, n_segments=20, overlap=0.5):
     return X, Y, Z
 
 
+def calculate_cepstrum_routes(channel_data,fs):
+    fft_result = fft(channel_data)
+    log_spectrum = np.log(np.abs(fft_result) + 1e-10)  # 避免 log(0)
+    cepstrum = np.abs(ifft(log_spectrum))  # 实倒谱
 
+    # 计算倒谱的 quefrency（倒频率）轴
+    quefrency = np.arange(len(channel_data)) / fs
 
-
-
-
-
+    return quefrency, cepstrum

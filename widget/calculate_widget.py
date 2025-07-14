@@ -2,7 +2,7 @@ import os
 
 import mplcursors
 import numpy as np
-from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QMessageBox, QInputDialog
 from PyQt5 import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -34,6 +34,42 @@ class calculateWidget(QTabWidget):
             self.draw_fft(new_tab)
             self.setCurrentIndex(tab_index)
 
+    def selfcomposed(self):
+        self.auto_fill_file_path()
+        if self.file_path is None:
+            return
+        channel_name = self.choose_one_channel()
+        if channel_name is None:
+            return
+        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_one_octave_spectrum'
+        tab_index = -1
+        for index in range(self.count()):
+            if self.tabText(index) == name:
+                tab_index = index
+        if tab_index == -1:
+            new_tab = create_calculate_widget(need_button=True)  # 创建空白页面（可替换为你的自定义控件）
+            tab_index = self.addTab(new_tab, name)
+            calculate_selfcomposed(self.file_path, new_tab, channel_name)
+            self.setCurrentIndex(tab_index)
+
+    def cepstrum(self):
+        self.auto_fill_file_path()
+        if self.file_path is None:
+            return
+        channel_name = self.choose_one_channel()
+        if channel_name is None:
+            return
+        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_one_octave_spectrum'
+        tab_index = -1
+        for index in range(self.count()):
+            if self.tabText(index) == name:
+                tab_index = index
+        if tab_index == -1:
+            new_tab = create_calculate_widget(need_button=True)  # 创建空白页面（可替换为你的自定义控件）
+            tab_index = self.addTab(new_tab, name)
+            calculate_cepstrum(self.file_path, new_tab, channel_name)
+            self.setCurrentIndex(tab_index)
+
     def create_fft_widget(self):
         new_tab = QWidget()  # 创建空白页面（可替换为你的自定义控件）
         new_tab.figure = Figure()
@@ -57,6 +93,22 @@ class calculateWidget(QTabWidget):
             )
         )
         widget.canvas.draw()
+
+    def choose_one_channel(self):
+        _, _, channel_names = get_csv_info(self.file_path)
+        items = channel_names
+        selected, ok = QInputDialog.getItem(
+            None,  # 父窗口（None表示无父窗口）
+            "选择通道",  # 标题
+            "请选择一个通道:",  # 提示文本
+            items,  # 选项列表
+            0,  # 默认选中索引
+            False  # 是否可编辑
+        )
+        if ok and selected:
+            return selected
+        else:
+            return None
 
     def close_calculatetab(self, index):
         self.removeTab(index)

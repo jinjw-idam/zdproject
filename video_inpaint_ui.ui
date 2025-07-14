@@ -252,7 +252,9 @@
      <addaction name="actionmax"/>
      <addaction name="actionmin"/>
      <addaction name="actionrms"/>
-     <addaction name="actionsincos"/>
+     <addaction name="actioncalculate_all"/>
+     <addaction name="separator"/>
+     <addaction name="actionsincos_2"/>
     </widget>
     <addaction name="actionfft"/>
     <addaction name="actionifft"/>
@@ -349,27 +351,27 @@
   </action>
   <action name="actionsum">
    <property name="text">
-    <string>sum</string>
+    <string>求和</string>
    </property>
   </action>
   <action name="actionaverage">
    <property name="text">
-    <string>average</string>
+    <string>求平均</string>
    </property>
   </action>
   <action name="actionmax">
    <property name="text">
-    <string>max</string>
+    <string>求最大值</string>
    </property>
   </action>
   <action name="actionmin">
    <property name="text">
-    <string>min</string>
+    <string>求最小值</string>
    </property>
   </action>
   <action name="actionrms">
    <property name="text">
-    <string>均方根</string>
+    <string>求均方根</string>
    </property>
   </action>
   <action name="actionsincos">
@@ -380,6 +382,16 @@
   <action name="actionweight">
    <property name="text">
     <string>计权</string>
+   </property>
+  </action>
+  <action name="actioncalculate_all">
+   <property name="text">
+    <string>计算全部</string>
+   </property>
+  </action>
+  <action name="actionsincos_2">
+   <property name="text">
+    <string>三角函数</string>
    </property>
   </action>
  </widget>
