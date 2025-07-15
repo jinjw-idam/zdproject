@@ -41,7 +41,7 @@ class calculateWidget(QTabWidget):
         channel_name = self.choose_one_channel()
         if channel_name is None:
             return
-        base_name=os.path.splitext(os.path.basename(self.file_path))[0]
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
         name = base_name + '_' + channel_name + '_selfcomposed'
         tab_index = -1
         for index in range(self.count()):
@@ -60,7 +60,7 @@ class calculateWidget(QTabWidget):
         channel_name = self.choose_one_channel()
         if channel_name is None:
             return
-        base_name=os.path.splitext(os.path.basename(self.file_path))[0]
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
         name = base_name + '_' + channel_name + '_cepstrum'
         tab_index = -1
         for index in range(self.count()):
@@ -85,12 +85,12 @@ class calculateWidget(QTabWidget):
             if self.tabText(index) == name:
                 tab_index = index
         if tab_index == -1:
-            new_tab = create_calculate_widget(need_button=False,need_label=True)  # 创建空白页面（可替换为你的自定义控件）
+            new_tab = create_calculate_widget(need_button=False, need_label=True)  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
             calculate_all(self.file_path, new_tab, channel_name)
             self.setCurrentIndex(tab_index)
 
-    def weight_calculate(self,type):
+    def weight_calculate(self, type):
         self.auto_fill_file_path()
         if self.file_path is None:
             return
@@ -107,6 +107,25 @@ class calculateWidget(QTabWidget):
             new_tab = create_calculate_widget(need_button=True, need_label=False)  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
             calculate_weight(self.file_path, new_tab, base_name, channel_name, type)
+            self.setCurrentIndex(tab_index)
+
+    def trig_calculate(self):
+        self.auto_fill_file_path()
+        if self.file_path is None:
+            return
+        channel_name,method_type = self.choose_channel_type()
+        if channel_name is None or method_type is None:
+            return
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + f'_{method_type}calculate'
+        tab_index = -1
+        for index in range(self.count()):
+            if self.tabText(index) == name:
+                tab_index = index
+        if tab_index == -1:
+            new_tab = create_calculate_widget(need_button=True, need_label=False)  # 创建空白页面（可替换为你的自定义控件）
+            tab_index = self.addTab(new_tab, name)
+            calculate_trig(self.file_path, new_tab, base_name, channel_name, method_type)
             self.setCurrentIndex(tab_index)
 
     def create_fft_widget(self):
@@ -149,7 +168,7 @@ class calculateWidget(QTabWidget):
         else:
             return None
 
-    def choose_channel_sincos(self):
+    def choose_channel_type(self):
         _, _, channel_names = get_csv_info(self.file_path)
 
         # 创建自定义对话框
@@ -160,15 +179,15 @@ class calculateWidget(QTabWidget):
         layout = QVBoxLayout()
 
         # 第一个下拉框
-        layout.addWidget(QLabel("选择第一个通道:"))
+        layout.addWidget(QLabel("选择通道:"))
         combo1 = QComboBox()
         combo1.addItems(channel_names)
         layout.addWidget(combo1)
 
         # 第二个下拉框
-        layout.addWidget(QLabel("选择第二个通道:"))
+        layout.addWidget(QLabel("选择三角函数:"))
         combo2 = QComboBox()
-        combo2.addItems(channel_names)
+        combo2.addItems(['sin', 'cos', 'tan'])
         layout.addWidget(combo2)
 
         # 确认按钮
@@ -180,9 +199,9 @@ class calculateWidget(QTabWidget):
 
         # 显示对话框并获取结果
         if dialog.exec_() == QDialog.Accepted:
-            channel1 = combo1.currentText()
-            channel2 = combo2.currentText()
-            return channel1, channel2
+            channel_name = combo1.currentText()
+            method_type = combo2.currentText()
+            return channel_name, method_type
         return None, None  # 用户取消
 
     def close_calculatetab(self, index):

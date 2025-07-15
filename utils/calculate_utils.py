@@ -96,24 +96,52 @@ def calculate_all(file_path, show_widget: QWidget, channel_name):
     show_widget.canvas.draw()
 
 
-def calculate_weight(file_path, show_widget: QWidget, base_name, channel_name, type):
+def calculate_weight(file_path, show_widget: QWidget, base_name, channel_name, method_type):
     time_list, channel_matrix, channel_names = get_csv_info(file_path)
     channel_index = channel_names.index(channel_name)
     channel_data = channel_matrix[channel_index]
     fs = 1 / (time_list[1] - time_list[0])
-    f,Pxx = apply_weighting(channel_data, fs, type)
+    f, Pxx = apply_weighting(channel_data, fs, method_type)
     ax = show_widget.figure.add_subplot(1, 1, 1)
     line = ax.plot(f, Pxx)
     ax.set_xlabel('频率')
     ax.set_ylabel('功率谱密度')
-    ax.set_title(f'{type} 计权结果')
+    ax.set_title(f'{method_type} 计权结果')
     show_widget.cursor = mplcursors.cursor(line, hover=True)
     show_widget.cursor.connect(
         "add", lambda sel: sel.annotation.set_text(
             f"X: {sel.target[0]:.2f}\nY: {sel.target[1]:.2f}"
         )
     )
-    show_widget.save_button.clicked.connect(lambda: save(show_widget.figure, base_name, channel_name, f"{type}计权"))
+    show_widget.save_button.clicked.connect(lambda: save(show_widget.figure, base_name, channel_name, f"{method_type}计权"))
+    show_widget.canvas.draw()
+
+
+def calculate_trig(file_path, show_widget: QWidget, base_name, channel_name, method_type):
+    time_list, channel_matrix, channel_names = get_csv_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    channel_data = channel_matrix[channel_index]
+    ax = show_widget.figure.add_subplot(1, 1, 1)
+    line=None
+    if method_type == 'sin':
+        line = ax.plot(time_list, np.sin(channel_data))
+        ax.set_ylabel('正弦值')
+        ax.set_title(f'{method_type} 计算结果')
+    if method_type == 'cos':
+        line = ax.plot(time_list, np.cos(channel_data))
+        ax.set_ylabel('余弦值')
+        ax.set_title(f'{method_type} 计算结果')
+    if method_type == 'tan':
+        line = ax.plot(time_list, np.tan(channel_data))
+        ax.set_ylabel('正切值')
+        ax.set_title(f'{method_type} 计算结果')
+    show_widget.cursor = mplcursors.cursor(line, hover=True)
+    show_widget.cursor.connect(
+        "add", lambda sel: sel.annotation.set_text(
+            f"X: {sel.target[0]:.2f}\nY: {sel.target[1]:.2f}"
+        )
+    )
+    show_widget.save_button.clicked.connect(lambda: save(show_widget.figure, base_name, channel_name, f"{method_type}计算"))
     show_widget.canvas.draw()
 
 

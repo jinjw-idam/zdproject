@@ -55,6 +55,8 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.actioncepstrum.triggered.connect(self.calculateWidget.cepstrum)
         # 数学计算
         self.actioncalculate_all.triggered.connect(self.calculateWidget.math_calculate)
+        # 三角函数运算
+        self.actionsincos_2.triggered.connect(self.calculateWidget.trig_calculate)
         # 计权运算
         self.actionA_weight.triggered.connect(lambda: self.calculateWidget.weight_calculate('A'))
         self.actionB_weight.triggered.connect(lambda: self.calculateWidget.weight_calculate('B'))
