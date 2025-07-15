@@ -11,7 +11,7 @@ from matplotlib.widgets import SpanSelector
 from scipy import signal
 from scipy.fft import fft, fftfreq
 
-from routes import calculate_cepstrum_routes, calculate_all_routes
+from routes import calculate_cepstrum_routes, calculate_all_routes, apply_weighting
 from utils.file_utils import *
 
 matplotlib.rc("font", family='Microsoft YaHei')
@@ -96,6 +96,27 @@ def calculate_all(file_path, show_widget: QWidget, channel_name):
     show_widget.canvas.draw()
 
 
+def calculate_weight(file_path, show_widget: QWidget, base_name, channel_name, type):
+    time_list, channel_matrix, channel_names = get_csv_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    channel_data = channel_matrix[channel_index]
+    fs = 1 / (time_list[1] - time_list[0])
+    f,Pxx = apply_weighting(channel_data, fs, type)
+    ax = show_widget.figure.add_subplot(1, 1, 1)
+    line = ax.plot(f, Pxx)
+    ax.set_xlabel('频率')
+    ax.set_ylabel('功率谱密度')
+    ax.set_title(f'{type} 计权结果')
+    show_widget.cursor = mplcursors.cursor(line, hover=True)
+    show_widget.cursor.connect(
+        "add", lambda sel: sel.annotation.set_text(
+            f"X: {sel.target[0]:.2f}\nY: {sel.target[1]:.2f}"
+        )
+    )
+    show_widget.save_button.clicked.connect(lambda: save(show_widget.figure, base_name, channel_name, f"{type}计权"))
+    show_widget.canvas.draw()
+
+
 def create_calculate_widget(need_button=False, need_label=False):
     new_tab = QWidget()  # 创建空白页面（可替换为你的自定义控件）
     new_tab.figure = Figure()
@@ -121,7 +142,7 @@ def create_calculate_widget(need_button=False, need_label=False):
 def save(figure, base_name, channel_name, type):
     # 构建保存路径
     save_dir = os.path.join('data_block', base_name)
-    save_name = channel_name + '_' +type + '.png'
+    save_name = channel_name + '_' + type + '.png'
     save_path = os.path.join(save_dir, save_name)
 
     # 确保目录存在（如果不存在则创建）

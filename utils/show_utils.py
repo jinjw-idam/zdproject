@@ -224,10 +224,18 @@ def draw_shishishow(file_path, show_widget: QWidget):
     time_list, channel_matrix, channel_names = get_csv_info(file_path)
     channel_num = len(channel_names)
     for i in range(channel_num):
-        ax = show_widget.figure.add_subplot(channel_num, 1, i+1)
-        ax.plot(time_list,channel_matrix[i])
+        ax = show_widget.figure.add_subplot(channel_num, 1, i + 1)
+        line = ax.plot(time_list, channel_matrix[i])
         ax.set_title(f"{channel_names[i]}")
         ax.set_ylabel("振幅")
+        cursor = mplcursors.cursor(line, hover=True)
+
+        # 自定义标注文本
+        @cursor.connect("add")
+        def on_add(sel):
+            x, y = sel.target
+            sel.annotation.set(text=f"x={x:.2f}\ny={y:.2f}")
+            sel.annotation.get_bbox_patch().set(fc="white", alpha=0.8)
     ax.set_xlabel('时间')
     ax.figure.tight_layout()
     show_widget.canvas.draw()

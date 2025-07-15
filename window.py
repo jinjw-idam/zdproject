@@ -8,6 +8,7 @@ from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
 
 from widget.date_widget import date_widget
+from widget.display_widget import displayWidget
 from widget.report_widget import report_widget
 from widget.show_widget import showWidget
 from widget.calculate_widget import calculateWidget
@@ -17,13 +18,13 @@ from utils.calculate_utils import *
 from utils.show_utils import *
 
 
-
 class main_window(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(main_window, self).__init__()
         self.uploaded_file_path = None  # 全局共享的上传文件路径
         self.setupUi(self)
         self.showWidget = showWidget(self)
+        self.displayWidget = displayWidget(self)
         self.calculateWidget = calculateWidget(self)
         self.dateWidget = date_widget(self)
         self.reportWidget = report_widget(self)
@@ -54,6 +55,10 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.actioncepstrum.triggered.connect(self.calculateWidget.cepstrum)
         # 数学计算
         self.actioncalculate_all.triggered.connect(self.calculateWidget.math_calculate)
+        # 计权运算
+        self.actionA_weight.triggered.connect(lambda: self.calculateWidget.weight_calculate('A'))
+        self.actionB_weight.triggered.connect(lambda: self.calculateWidget.weight_calculate('B'))
+        self.actionC_weight.triggered.connect(lambda: self.calculateWidget.weight_calculate('C'))
         # 展示数据库
         self.actionshujuku.triggered.connect(self.dateWidget.show_database)
         # 生成报告
@@ -61,12 +66,10 @@ class main_window(QMainWindow, Ui_MainWindow):
         # 绑定打印菜单
         self.actiondayin.triggered.connect(self.reportWidget.generate_and_print_report)
 
-
     def open_file(self):
         uploaded_file_path = QFileDialog.getOpenFileName(None, 'Select File')[0]
         self.uploaded_file_path = uploaded_file_path
-        # self.showWidget.shishi_show()
-
+        self.displayWidget.shishi_show()
 
 
 if __name__ == '__main__':

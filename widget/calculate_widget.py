@@ -90,6 +90,25 @@ class calculateWidget(QTabWidget):
             calculate_all(self.file_path, new_tab, channel_name)
             self.setCurrentIndex(tab_index)
 
+    def weight_calculate(self,type):
+        self.auto_fill_file_path()
+        if self.file_path is None:
+            return
+        channel_name = self.choose_one_channel()
+        if channel_name is None:
+            return
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + f'_{type}weightcalculate'
+        tab_index = -1
+        for index in range(self.count()):
+            if self.tabText(index) == name:
+                tab_index = index
+        if tab_index == -1:
+            new_tab = create_calculate_widget(need_button=True, need_label=False)  # 创建空白页面（可替换为你的自定义控件）
+            tab_index = self.addTab(new_tab, name)
+            calculate_weight(self.file_path, new_tab, base_name, channel_name, type)
+            self.setCurrentIndex(tab_index)
+
     def create_fft_widget(self):
         new_tab = QWidget()  # 创建空白页面（可替换为你的自定义控件）
         new_tab.figure = Figure()
@@ -183,6 +202,7 @@ class calculateWidget(QTabWidget):
     def init_ui(self):
         self.setParent(self.main_window.centralwidget)
         self.setGeometry(QtCore.QRect(0, 530, 521, 531))
+        self.setTabsClosable(True)
         self.setObjectName("calculateWidget")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
