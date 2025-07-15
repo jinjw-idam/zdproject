@@ -25,13 +25,13 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.showWidget = showWidget(self)
         self.calculateWidget = calculateWidget(self)
-        # self.dateWidget = date_widget(self)
+        self.dateWidget = date_widget(self)
         self.reportWidget = report_widget(self)
 
         # 记住全局路径
         self.actionopen.triggered.connect(self.open_file)
         # 打开文件的时候 保存放在数据库里
-        # self.actionopen.triggered.connect(self.dateWidget.show_and_upload)
+        self.actionopen.triggered.connect(self.dateWidget.show_and_upload)
         # 画XY图
         self.actionXY.triggered.connect(self.showWidget.draw_XY_img)
         # 画瀑布图
@@ -55,11 +55,11 @@ class main_window(QMainWindow, Ui_MainWindow):
         # 数学计算
         self.actioncalculate_all.triggered.connect(self.calculateWidget.math_calculate)
         # 展示数据库
-        # self.actionshujuku.triggered.connect(self.dateWidget.show_database)
+        self.actionshujuku.triggered.connect(self.dateWidget.show_database)
         # 生成报告
-        # self.actionshengc.triggered.connect(self.reportWidget.generate_report)
+        self.actionsehngc.triggered.connect(self.reportWidget.generate_report)
         # 绑定打印菜单
-        # self.actiondayin.triggered.connect(self.reportWidget.generate_and_print_report)
+        self.actiondayin.triggered.connect(self.reportWidget.generate_and_print_report)
 
 
     def open_file(self):

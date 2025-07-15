@@ -39,7 +39,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -75,112 +75,7 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QTabWidget" name="displayWidget">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>530</y>
-      <width>1351</width>
-      <height>531</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>1</number>
-    </property>
-    <widget class="QWidget" name="tab_7">
-     <attribute name="title">
-      <string>Tab 1</string>
-     </attribute>
-     <widget class="QTableView" name="tableView">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>1331</width>
-        <height>421</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>270</x>
-        <y>450</y>
-        <width>141</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string> I  D :</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_2">
-      <property name="geometry">
-       <rect>
-        <x>580</x>
-        <y>450</y>
-        <width>141</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>文件名：</string>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit">
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>450</y>
-        <width>211</width>
-        <height>31</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit_2">
-      <property name="geometry">
-       <rect>
-        <x>660</x>
-        <y>450</y>
-        <width>211</width>
-        <height>31</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton">
-      <property name="geometry">
-       <rect>
-        <x>930</x>
-        <y>530</y>
-        <width>93</width>
-        <height>28</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>查找</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_2">
-      <property name="geometry">
-       <rect>
-        <x>1080</x>
-        <y>530</y>
-        <width>93</width>
-        <height>28</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>查找全部</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="tab_8">
-     <attribute name="title">
-      <string>Tab 2</string>
-     </attribute>
-    </widget>
-   </widget>
-   <widget class="QTabWidget" name="fileWidget">
+   <widget class="QTabWidget" name="dataWidget">
     <property name="geometry">
      <rect>
       <x>530</x>
@@ -192,12 +87,52 @@
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="tab_9">
+    <widget class="QWidget" name="tab_7">
+     <attribute name="title">
+      <string>Tab 1</string>
+     </attribute>
+     <widget class="QTableView" name="tableView">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>601</width>
+        <height>481</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QTableView" name="tableView_2">
+      <property name="geometry">
+       <rect>
+        <x>620</x>
+        <y>10</y>
+        <width>591</width>
+        <height>481</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_8">
+     <attribute name="title">
+      <string>Tab 2</string>
+     </attribute>
+    </widget>
+   </widget>
+   <widget class="QTabWidget" name="displayWidget">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>550</y>
+      <width>1341</width>
+      <height>491</height>
+     </rect>
+    </property>
+    <widget class="QWidget" name="tab_5">
      <attribute name="title">
       <string>Tab 1</string>
      </attribute>
     </widget>
-    <widget class="QWidget" name="tab_10">
+    <widget class="QWidget" name="tab_6">
      <attribute name="title">
       <string>Tab 2</string>
      </attribute>
@@ -210,7 +145,7 @@
      <x>0</x>
      <y>0</y>
      <width>1920</width>
-     <height>17</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -238,6 +173,7 @@
     <addaction name="actionUL"/>
     <addaction name="menu_5"/>
     <addaction name="actionNyquist"/>
+    <addaction name="actionshujuku"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -268,6 +204,8 @@
     <property name="title">
      <string>分析</string>
     </property>
+    <addaction name="actionsehngc"/>
+    <addaction name="actiondayin"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -392,6 +330,21 @@
   <action name="actionsincos_2">
    <property name="text">
     <string>三角函数</string>
+   </property>
+  </action>
+  <action name="actionsehngc">
+   <property name="text">
+    <string>生成报告</string>
+   </property>
+  </action>
+  <action name="actiondayin">
+   <property name="text">
+    <string>打印报告</string>
+   </property>
+  </action>
+  <action name="actionshujuku">
+   <property name="text">
+    <string>数据库</string>
    </property>
   </action>
  </widget>
