@@ -136,6 +136,24 @@ class showWidget(QTabWidget):
             draw_one_octave_spectrum(self.file_path, new_tab,channel_name)
             self.setCurrentIndex(tab_index)
 
+    def draw_colormap_img(self):
+        self.auto_fill_file_path()
+        if self.file_path is None:
+            return
+        channel_name = self.choose_channel()
+        if channel_name is None:
+            return
+        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_colormap'
+        tab_index = -1
+        for index in range(self.count()):
+            if self.tabText(index) == name:
+                tab_index = index
+        if tab_index == -1:
+            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+            tab_index = self.addTab(new_tab, name)
+            draw_colormap(self.file_path, new_tab, channel_name)
+            self.setCurrentIndex(tab_index)
+
     def shishi_show(self):
         self.auto_fill_file_path()
         if self.file_path is None:

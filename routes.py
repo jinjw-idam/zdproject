@@ -760,6 +760,20 @@ def get_waterfall_info(file_path, n_segments=20, overlap=0.5):
     return X, Y, Z
 
 
+def get_colormap_info(channel_data, fs):
+    # STFT 参数
+    window = 'hann'  # 窗函数
+    nperseg = 256  # 每段FFT长度
+    noverlap = 128  # 重叠点数
+
+    # 计算STFT
+    f, t_stft, Zxx = signal.stft(channel_data, fs, window=window, nperseg=nperseg, noverlap=noverlap)
+
+    # Zxx 是复数矩阵，取其幅值（dB或线性）
+    amplitude = np.abs(Zxx)  # 线性幅值
+    return t_stft,f,amplitude
+
+
 def calculate_cepstrum_routes(channel_data, fs):
     fft_result = fft(channel_data)
     log_spectrum = np.log(np.abs(fft_result) + 1e-10)  # 避免 log(0)
@@ -875,5 +889,5 @@ def apply_weighting(data, fs, weighting_type='A'):
     """
     b, a = design_weighting_filter(fs, weighting_type)
     weighted_data = signal.lfilter(b, a, data)
-    f, Pxx = signal.welch(weighted_data, fs, nperseg=len(weighted_data))
-    return f,Pxx
+    f, Pxx = signal.welch(weighted_data, fs, nperseg=fs//2)
+    return f, Pxx

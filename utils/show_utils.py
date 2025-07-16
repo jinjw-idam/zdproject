@@ -15,7 +15,7 @@ from matplotlib.widgets import SpanSelector
 from scipy import signal
 from scipy.fft import fft, fftfreq
 
-from routes import third_octave_spectrum, one_octave_spectrum, get_waterfall_info
+from routes import third_octave_spectrum, one_octave_spectrum, get_waterfall_info, get_colormap_info
 from utils.file_utils import *
 
 matplotlib.rc("font", family='Microsoft YaHei')
@@ -216,6 +216,22 @@ def draw_one_octave_spectrum(file_path, show_widget: QWidget, channel_name):
 
     # 网格和样式
     ax.grid(axis='y', linestyle='--', alpha=0.7)
+    ax.figure.tight_layout()
+    show_widget.canvas.draw()
+
+
+def draw_colormap(file_path, show_widget: QWidget, channel_name):
+    time_list, channel_matrix, channel_names = get_csv_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    channel_data = channel_matrix[channel_index]
+    fs = 1 / (time_list[1] - time_list[0])
+    t_stft, f, amplitude = get_colormap_info(channel_data, fs)
+    ax = show_widget.figure.add_subplot(1, 1, 1)
+    mesh = ax.pcolormesh(t_stft, f, amplitude, shading='auto', cmap='jet')  # 'viridis', 'plasma' 等可选
+    show_widget.figure.colorbar(mesh, ax=ax, label='Amplitude (m/s²)')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Frequency (Hz)')
+    ax.set_title('Colormap')
     ax.figure.tight_layout()
     show_widget.canvas.draw()
 

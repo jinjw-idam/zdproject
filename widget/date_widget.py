@@ -168,6 +168,7 @@ class date_widget(QTabWidget):
             if self.main_window:
                 self.main_window.uploaded_file_path = file_path
                 print(f"全局文件路径已更新为：\n{file_path}")
+                self.main_window.displayWidget.shishi_show()
 
 
     def show_table(self, data, is_frequency=False):
