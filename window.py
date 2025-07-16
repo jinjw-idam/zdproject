@@ -71,7 +71,7 @@ class main_window(QMainWindow, Ui_MainWindow):
     def open_file(self):
         uploaded_file_path = QFileDialog.getOpenFileName(None, 'Select File')[0]
         self.uploaded_file_path = uploaded_file_path
-        self.displayWidget.shishi_show()
+        # self.displayWidget.shishi_show()
 
 
 if __name__ == '__main__':

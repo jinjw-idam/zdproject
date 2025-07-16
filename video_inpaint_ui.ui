@@ -85,7 +85,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_7">
      <attribute name="title">
@@ -96,17 +96,7 @@
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>601</width>
-        <height>481</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QTableView" name="tableView_2">
-      <property name="geometry">
-       <rect>
-        <x>620</x>
-        <y>10</y>
-        <width>591</width>
+        <width>1201</width>
         <height>481</height>
        </rect>
       </property>
@@ -116,6 +106,16 @@
      <attribute name="title">
       <string>Tab 2</string>
      </attribute>
+     <widget class="QTableView" name="tableView_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>1201</width>
+        <height>481</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QTabWidget" name="displayWidget">
@@ -145,7 +145,7 @@
      <x>0</x>
      <y>0</y>
      <width>1920</width>
-     <height>17</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

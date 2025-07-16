@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
         self.centralwidget.setSizePolicy(sizePolicy)
         self.centralwidget.setMaximumSize(QtCore.QSize(16777215, 16777213))
         self.centralwidget.setObjectName("centralwidget")
-        # 1
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 1920, 26))
@@ -140,12 +140,13 @@ class Ui_MainWindow(object):
         self.menuBar.addAction(self.menu_4.menuAction())
 
         self.retranslateUi(MainWindow)
+
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "振动监测软件"))
-        # 2
+        MainWindow.setWindowTitle(_translate("MainWindow", "图像视频物体消除"))
+
         self.menu.setTitle(_translate("MainWindow", "文件"))
         self.menu_2.setTitle(_translate("MainWindow", "显示"))
         self.menu_5.setTitle(_translate("MainWindow", "倍频图"))
