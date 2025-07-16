@@ -52,6 +52,33 @@ class date_widget(QTabWidget):
 
 
 
+        # self.setParent(self.main_window.centralwidget)
+        # self.setGeometry(QtCore.QRect(530, 0, 1351, 531))
+        #
+        # self.tab_7 = QtWidgets.QWidget()
+        # self.tab_7.setObjectName("tab_7")
+        # self.tableView = QtWidgets.QTableView(self.tab_7)
+        # self.tableView.setGeometry(QtCore.QRect(10, 10, 1201, 520))
+        # self.tableView.setObjectName("tableView")
+        # self.addTab(self.tab_7, "通道数据")
+        #
+        # self.tab_8 = QtWidgets.QWidget()
+        # self.tab_8.setObjectName("tab_8")
+        # self.tableView_2 = QtWidgets.QTableView(self.tab_8)
+        # self.tableView_2.setGeometry(QtCore.QRect(10, 10, 1201, 520))
+        # self.tableView_2.setObjectName("tableView_2")
+        # self.addTab(self.tab_8, "频率数据")
+        #
+        #
+        # self.setCurrentIndex(0)
+        #
+        #
+        # # 配置表头自适应 能够点击表项响应全局变量
+        # self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        # 绑定功能
+        # self.pushButton_2.clicked.connect(self.search_all)
+        # self.pushButton.clicked.connect(self.search_by_condition)
+
     # 可以不写 为了测试用的
     def auto_fill_file_path(self):
         print("展示全局路径：", self.main_window.uploaded_file_path)
@@ -168,7 +195,6 @@ class date_widget(QTabWidget):
             if self.main_window:
                 self.main_window.uploaded_file_path = file_path
                 print(f"全局文件路径已更新为：\n{file_path}")
-                self.main_window.displayWidget.shishi_show()
 
 
     def show_table(self, data, is_frequency=False):
