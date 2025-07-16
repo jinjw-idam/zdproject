@@ -173,6 +173,7 @@
     <addaction name="actionUL"/>
     <addaction name="menu_5"/>
     <addaction name="actionNyquist"/>
+    <addaction name="actionColormap"/>
     <addaction name="actionshujuku"/>
    </widget>
    <widget class="QMenu" name="menu_3">
@@ -363,6 +364,11 @@
   <action name="actionC_weight">
    <property name="text">
     <string>C计权</string>
+   </property>
+  </action>
+  <action name="actionColormap">
+   <property name="text">
+    <string>Colormap图</string>
    </property>
   </action>
  </widget>

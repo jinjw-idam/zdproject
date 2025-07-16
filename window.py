@@ -47,6 +47,8 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.action1_3.triggered.connect(self.showWidget.draw_third_octave_spectrum_img)
         # 画单倍频程图
         self.action1_1.triggered.connect(self.showWidget.draw_one_octave_spectrum_img)
+        # 画colormap图
+        self.actionColormap.triggered.connect(self.showWidget.draw_colormap_img)
         # fft计算
         self.actionfft.triggered.connect(self.calculateWidget.generate_fft)
         # 自谱计算
