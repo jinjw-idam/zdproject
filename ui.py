@@ -43,6 +43,8 @@ class Ui_MainWindow(object):
         self.menu_7.setObjectName("menu_7")
         self.menu_4 = QtWidgets.QMenu(self.menuBar)
         self.menu_4.setObjectName("menu_4")
+        self.menu_8 = QtWidgets.QMenu(self.menuBar)
+        self.menu_8.setObjectName("menu_8")
         MainWindow.setMenuBar(self.menuBar)
         self.actionopen = QtWidgets.QAction(MainWindow)
         self.actionopen.setObjectName("actionopen")
@@ -104,6 +106,9 @@ class Ui_MainWindow(object):
         self.actionC_weight.setObjectName("actionC_weight")
         self.actionColormap = QtWidgets.QAction(MainWindow)
         self.actionColormap.setObjectName("actionColormap")
+
+        self.actionjianting = QtWidgets.QAction(MainWindow)
+        self.actionjianting.setObjectName("actionjianting")
         self.menu.addAction(self.actionopen)
         self.menu.addAction(self.actionout)
         self.menu_5.addAction(self.action1_3)
@@ -137,10 +142,13 @@ class Ui_MainWindow(object):
         self.menu_3.addAction(self.menu_7.menuAction())
         self.menu_4.addAction(self.actionsehngc)
         self.menu_4.addAction(self.actiondayin)
+
+        self.menu_8.addAction(self.actionjianting)
         self.menuBar.addAction(self.menu.menuAction())
         self.menuBar.addAction(self.menu_2.menuAction())
         self.menuBar.addAction(self.menu_3.menuAction())
         self.menuBar.addAction(self.menu_4.menuAction())
+        self.menuBar.addAction(self.menu_8.menuAction())
 
         self.retranslateUi(MainWindow)
 
@@ -157,6 +165,7 @@ class Ui_MainWindow(object):
         self.menu_6.setTitle(_translate("MainWindow", "数学运算"))
         self.menu_7.setTitle(_translate("MainWindow", "计权"))
         self.menu_4.setTitle(_translate("MainWindow", "分析"))
+        self.menu_8.setTitle(_translate("MainWindow", "模拟接口"))
         self.actionopen.setText(_translate("MainWindow", "打开"))
         self.actionout.setText(_translate("MainWindow", "导出"))
         self.actionXY.setText(_translate("MainWindow", "XY"))
@@ -187,3 +196,5 @@ class Ui_MainWindow(object):
         self.actionB_weight.setText(_translate("MainWindow", "B计权"))
         self.actionC_weight.setText(_translate("MainWindow", "C计权"))
         self.actionColormap.setText(_translate("MainWindow", "Colormap图"))
+
+        self.actionjianting.setText(_translate("MainWindow", "监听接口"))

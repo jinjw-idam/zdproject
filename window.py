@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
 
 from widget.date_widget import date_widget
 from widget.display_widget import displayWidget
+from widget.interface_widget import interface_widget
 from widget.report_widget import report_widget
 from widget.show_widget import showWidget
 from widget.calculate_widget import calculateWidget
@@ -28,6 +29,7 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.calculateWidget = calculateWidget(self)
         self.dateWidget = date_widget(self)
         self.reportWidget = report_widget(self)
+        self.interfaceWidget = interface_widget(self)
 
         # 记住全局路径
         self.actionopen.triggered.connect(self.open_file)
@@ -69,6 +71,8 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.actionsehngc.triggered.connect(self.reportWidget.generate_report)
         # 绑定打印菜单
         self.actiondayin.triggered.connect(self.reportWidget.generate_and_print_report)
+        # 监听
+        self.actionjianting.triggered.connect(self.interfaceWidget.listen)
 
     def open_file(self):
         uploaded_file_path = QFileDialog.getOpenFileName(None, 'Select File')[0]

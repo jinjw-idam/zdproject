@@ -1,6 +1,13 @@
 import json
 import traceback
+import threading
+import time
 
+import requests
+from flask import Blueprint, request, jsonify
+import os
+import pandas as pd
+from datetime import datetime
 import matplotlib
 import pythoncom
 import win32com.client
@@ -38,6 +45,17 @@ UPLOAD_DIR = 'static/uploaded_files'
 plt.rcParams['axes.unicode_minus'] = False  # avoid minus sign issue
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+channel_cache = []
+frequency_cache = []
+LAST_RECEIVE_TIME = time.time()
+LOCK = threading.Lock()
+
+SAVE_DIR = 'cached_data'
+os.makedirs(SAVE_DIR, exist_ok=True)
+
+saved_files = []  # 记录最新保存文件列表，供前端查询
+
 
 
 @routes.route('/')
@@ -106,64 +124,126 @@ def draw_waterfall():
         print(str(e))
         return '500'
 
-# @routes.route('/upload', methods=['POST'])
-# def upload_file():
-#     if 'file' not in request.files:
-#         return jsonify({'error': 'No file part'}), 400
+def detect_data_type(data_dict):
+    keys = set(data_dict.keys())
+    if {'frequency', 'magnitude', 'phase'}.issubset(keys):
+        return 'frequency'
+    elif {'time', 'channel_1', 'channel_2', 'channel_3'}.issubset(keys):
+        return 'channel'
+    else:
+        return 'unknown'
+
+def save_cache_to_file(data_list, dtype):
+    global saved_files
+    if not data_list:
+        return
+    df = pd.DataFrame(data_list)
+    now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"{dtype}_{now_str}.xlsx"
+    filepath = os.path.join(SAVE_DIR, filename)
+    df.to_excel(filepath, index=False)
+    print(f"Saved {dtype} data to {filepath}")
+    saved_files.append(filename)
+
+@routes.route('/receive_data', methods=['POST'])
+def receive_data():
+    global LAST_RECEIVE_TIME, channel_cache, frequency_cache
+    data = request.get_json()
+    if not data:
+        return jsonify({'status': 'no data'}), 400
+
+    dtype = detect_data_type(data)
+    if dtype == 'unknown':
+        return jsonify({'status': 'unknown data type'}), 400
+
+    with LOCK:
+        if dtype == 'channel':
+            channel_cache.append(data)
+        elif dtype == 'frequency':
+            frequency_cache.append(data)
+        LAST_RECEIVE_TIME = time.time()
+
+    return jsonify({'status': 'received', 'data_type': dtype}), 200
+
+@routes.route('/save_cache_to_file', methods=['GET'])
+def trigger_cache_save():
+    global channel_cache, frequency_cache, LAST_RECEIVE_TIME
+    with LOCK:
+        save_cache_to_file(channel_cache, 'channel')
+        save_cache_to_file(frequency_cache, 'frequency')
+        channel_cache = []
+        frequency_cache = []
+        LAST_RECEIVE_TIME = time.time()
+    return jsonify({'status': 'cache saved'}), 200
+
+@routes.route('/save_file', methods=['GET'])
+def get_saved_files():
+    global saved_files
+    return jsonify({'files': saved_files})
+
+
+# def detect_data_type(data_dict):
+#     keys = set(data_dict.keys())
+#     if {'frequency', 'magnitude', 'phase'}.issubset(keys):
+#         return 'frequency'
+#     elif {'time', 'channel_1', 'channel_2', 'channel_3'}.issubset(keys):
+#         return 'channel'
+#     else:
+#         return 'unknown'
 #
-#     file = request.files['file']
-#     if file.filename == '':
-#         return jsonify({'error': 'No selected file'}), 400
 #
-#     filename = file.filename
-#     upload_time = datetime.utcnow()
+# def save_cache_to_file(data_list, dtype):
+#     global saved_files
+#     if not data_list:
+#         return
+#     df = pd.DataFrame(data_list)
+#     now_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+#     filename = f"{dtype}_{now_str}.xlsx"
+#     filepath = os.path.join(SAVE_DIR, filename)
+#     df.to_excel(filepath, index=False)
+#     print(f"Saved {dtype} data to {filepath}")
+#     saved_files.append(filename)
 #
-#     try:
-#         if filename.lower().endswith('.txt'):
-#             stream = io.StringIO(file.stream.read().decode('utf-8'))
-#             df = pd.read_csv(stream, delimiter='\t')
-#         elif filename.lower().endswith('.xlsx'):
-#             df = pd.read_excel(file)
-#         elif filename.lower().endswith('.csv'):
-#             stream = io.StringIO(file.stream.read().decode('utf-8'))
-#             df = pd.read_csv(stream)  # 默认逗号分隔
-#         else:
-#             return jsonify({'error': 'Unsupported file type'}), 400
 #
-#         if 'time' not in df.columns:
-#             return jsonify({'error': 'Missing required column: time'}), 400
-#         required_channels = ['channel_1', 'channel_2', 'channel_3']
-#         for ch in required_channels:
-#             if ch not in df.columns:
-#                 return jsonify({'error': f'Missing required channel column: {ch}'}), 400
+# @routes.route('/receive_data', methods=['POST'])
+# def receive_data():
+#     global LAST_RECEIVE_TIME, channel_cache, frequency_cache
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({'status': 'no data'}), 400
 #
-#         time_list = df['time'].tolist()
-#         channel_1_list = df['channel_1'].tolist()
-#         channel_2_list = df['channel_2'].tolist()
-#         channel_3_list = df['channel_3'].tolist()
+#     dtype = detect_data_type(data)
+#     if dtype == 'unknown':
+#         return jsonify({'status': 'unknown data type'}), 400
 #
-#         save_path = os.path.join(UPLOAD_DIR, filename)
-#         file.seek(0)
-#         file.save(save_path)
+#     with LOCK:
+#         if dtype == 'channel':
+#             channel_cache.append(data)
+#         elif dtype == 'frequency':
+#             frequency_cache.append(data)
+#         LAST_RECEIVE_TIME = time.time()
 #
-#         record = UploadedData(
-#             filename=filename,
-#             upload_time=upload_time,
-#             file_path=save_path,
-#             time_list=json.dumps(time_list),
-#             channel_1_list=json.dumps(channel_1_list),
-#             channel_2_list=json.dumps(channel_2_list),
-#             channel_3_list=json.dumps(channel_3_list)
-#         )
+#     return jsonify({'status': 'received', 'data_type': dtype}), 200
 #
-#         db.session.add(record)
-#         db.session.commit()
 #
-#         return jsonify({'message': '文件上传成功', 'id': record.id}), 200
+# @routes.route('/save_cache_to_file', methods=['GET'])
+# def trigger_cache_save():
+#     global channel_cache, frequency_cache, LAST_RECEIVE_TIME
+#     with LOCK:
+#         save_cache_to_file(channel_cache, 'channel')
+#         save_cache_to_file(frequency_cache, 'frequency')
+#         channel_cache = []
+#         frequency_cache = []
+#         LAST_RECEIVE_TIME = time.time()
+#     return jsonify({'status': 'cache saved'}), 200
 #
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({'error': str(e)}), 500
+#
+# @routes.route('/save_file', methods=['GET'])
+# def get_saved_files():
+#     global saved_files
+#     return jsonify({'files': saved_files})
+
+
 
 
 @routes.route('/upload_path', methods=['POST'])
