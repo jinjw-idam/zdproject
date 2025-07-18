@@ -72,87 +72,190 @@ class showWidget(QTabWidget):
 
     def draw_Bode_img(self):
         self.auto_fill_file_path()
+        file_path = self.file_path
         if self.file_path is None:
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_Bode'
-        tab_index = -1
-        for index in range(self.count()):
-            if self.tabText(index) == name:
-                tab_index = index
-        if tab_index == -1:
-            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
-            tab_index = self.addTab(new_tab, name)
-            draw_Bode(self.file_path, new_tab)
-            self.setCurrentIndex(tab_index)
+        if file_path and os.path.exists(file_path):
+            try:
+                # 自动判断文件类型，预读取前几行
+                if file_path.endswith(".xlsx"):
+                    df = pd.read_excel(file_path)
+                elif file_path.endswith(".csv") or file_path.endswith(".txt"):
+                    df = pd.read_csv(file_path, delimiter=None if file_path.endswith(".csv") else '\t')
+                else:
+                    QMessageBox.warning(self, "错误", "暂不支持的文件格式")
+                    return
+                if {"frequency", "magnitude", "phase"}.issubset(df.columns):
+                    name = os.path.splitext(os.path.basename(self.file_path))[0] + '_Bode'
+                    tab_index = -1
+                    for index in range(self.count()):
+                        if self.tabText(index) == name:
+                            tab_index = index
+                    if tab_index == -1:
+                        new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+                        tab_index = self.addTab(new_tab, name)
+                        draw_Bode(self.file_path, new_tab)
+                        self.setCurrentIndex(tab_index)
+                else:
+                    print("通道文件无法绘制Bode图")
+                    return
+            except Exception as e:
+                QMessageBox.critical(self, "异常", f"上传出错：{e}")
 
     def draw_Nyquist_img(self):
         self.auto_fill_file_path()
+        file_path = self.file_path
         if self.file_path is None:
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_Nyquist'
-        tab_index = -1
-        for index in range(self.count()):
-            if self.tabText(index) == name:
-                tab_index = index
-        if tab_index == -1:
-            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
-            tab_index = self.addTab(new_tab, name)
-            draw_Nyquist(self.file_path, new_tab)
-            self.setCurrentIndex(tab_index)
+        if file_path and os.path.exists(file_path):
+            try:
+                # 自动判断文件类型，预读取前几行
+                if file_path.endswith(".xlsx"):
+                    df = pd.read_excel(file_path)
+                elif file_path.endswith(".csv") or file_path.endswith(".txt"):
+                    df = pd.read_csv(file_path, delimiter=None if file_path.endswith(".csv") else '\t')
+                else:
+                    QMessageBox.warning(self, "错误", "暂不支持的文件格式")
+                    return
+                if {"frequency", "magnitude", "phase"}.issubset(df.columns):
+                    name = os.path.splitext(os.path.basename(self.file_path))[0] + '_Nyquist'
+                    tab_index = -1
+                    for index in range(self.count()):
+                        if self.tabText(index) == name:
+                            tab_index = index
+                    if tab_index == -1:
+                        new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+                        tab_index = self.addTab(new_tab, name)
+                        draw_Nyquist(self.file_path, new_tab)
+                        self.setCurrentIndex(tab_index)
+                else:
+                    print("通道文件无法绘制Nyquist图")
+                    return
+            except Exception as e:
+                QMessageBox.critical(self, "异常", f"上传出错：{e}")
+
+
+
+
 
     def draw_third_octave_spectrum_img(self):
         self.auto_fill_file_path()
+        file_path = self.file_path
         if self.file_path is None:
             return
-        channel_name = self.choose_channel()
-        if channel_name is None:
-            return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_third_octave_spectrum'
-        tab_index = -1
-        for index in range(self.count()):
-            if self.tabText(index) == name:
-                tab_index = index
-        if tab_index == -1:
-            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
-            tab_index = self.addTab(new_tab, name)
-            draw_third_octave_spectrum(self.file_path, new_tab,channel_name)
-            self.setCurrentIndex(tab_index)
+        if file_path and os.path.exists(file_path):
+            try:
+                # 自动判断文件类型，预读取前几行
+                import pandas as pd
+                if file_path.endswith(".xlsx"):
+                    df = pd.read_excel(file_path)
+                elif file_path.endswith(".csv") or file_path.endswith(".txt"):
+                    df = pd.read_csv(file_path, delimiter=None if file_path.endswith(".csv") else '\t')
+                else:
+                    QMessageBox.warning(self, "错误", "暂不支持的文件格式")
+                    return
+                # 根据列名决定上传接口
+                if {"channel_1", "channel_2", "channel_3"}.issubset(df.columns):
+                    channel_name = self.choose_channel()
+                    if channel_name is None:
+                        return
+                    name = os.path.splitext(os.path.basename(self.file_path))[
+                               0] + '_' + channel_name + '_third_octave_spectrum'
+                    tab_index = -1
+                    for index in range(self.count()):
+                        if self.tabText(index) == name:
+                            tab_index = index
+                    if tab_index == -1:
+                        new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+                        tab_index = self.addTab(new_tab, name)
+                        draw_third_octave_spectrum(self.file_path, new_tab, channel_name)
+                        self.setCurrentIndex(tab_index)
+                else:
+                    print("该文件为频率数据，不展示倍频图")
+            except Exception as e:
+                print(f"文件读取失败: {e}")
+
+
+
+
+
 
     def draw_one_octave_spectrum_img(self):
         self.auto_fill_file_path()
+        file_path = self.file_path
         if self.file_path is None:
             return
-        channel_name = self.choose_channel()
-        if channel_name is None:
-            return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_one_octave_spectrum'
-        tab_index = -1
-        for index in range(self.count()):
-            if self.tabText(index) == name:
-                tab_index = index
-        if tab_index == -1:
-            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
-            tab_index = self.addTab(new_tab, name)
-            draw_one_octave_spectrum(self.file_path, new_tab,channel_name)
-            self.setCurrentIndex(tab_index)
+        if file_path and os.path.exists(file_path):
+            try:
+                # 自动判断文件类型，预读取前几行
+                import pandas as pd
+                if file_path.endswith(".xlsx"):
+                    df = pd.read_excel(file_path)
+                elif file_path.endswith(".csv") or file_path.endswith(".txt"):
+                    df = pd.read_csv(file_path, delimiter=None if file_path.endswith(".csv") else '\t')
+                else:
+                    QMessageBox.warning(self, "错误", "暂不支持的文件格式")
+                    return
+                # 根据列名决定上传接口
+                if {"channel_1", "channel_2", "channel_3"}.issubset(df.columns):
+                    channel_name = self.choose_channel()
+                    if channel_name is None:
+                        return
+                    name = os.path.splitext(os.path.basename(self.file_path))[
+                               0] + '_' + channel_name + '_one_octave_spectrum'
+                    tab_index = -1
+                    for index in range(self.count()):
+                        if self.tabText(index) == name:
+                            tab_index = index
+                    if tab_index == -1:
+                        new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+                        tab_index = self.addTab(new_tab, name)
+                        draw_one_octave_spectrum(self.file_path, new_tab, channel_name)
+                        self.setCurrentIndex(tab_index)
+                else:
+                    print("该文件为频率数据，不展示倍频图")
+            except Exception as e:
+                print(f"文件读取失败: {e}")
+
+
 
     def draw_colormap_img(self):
         self.auto_fill_file_path()
+        file_path = self.file_path
         if self.file_path is None:
             return
-        channel_name = self.choose_channel()
-        if channel_name is None:
-            return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_colormap'
-        tab_index = -1
-        for index in range(self.count()):
-            if self.tabText(index) == name:
-                tab_index = index
-        if tab_index == -1:
-            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
-            tab_index = self.addTab(new_tab, name)
-            draw_colormap(self.file_path, new_tab, channel_name)
-            self.setCurrentIndex(tab_index)
+        if file_path and os.path.exists(file_path):
+            try:
+                # 自动判断文件类型，预读取前几行
+                import pandas as pd
+                if file_path.endswith(".xlsx"):
+                    df = pd.read_excel(file_path)
+                elif file_path.endswith(".csv") or file_path.endswith(".txt"):
+                    df = pd.read_csv(file_path, delimiter=None if file_path.endswith(".csv") else '\t')
+                else:
+                    QMessageBox.warning(self, "错误", "暂不支持的文件格式")
+                    return
+                # 根据列名决定上传接口
+                if {"channel_1", "channel_2", "channel_3"}.issubset(df.columns):
+                    channel_name = self.choose_channel()
+                    if channel_name is None:
+                        return
+                    name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_colormap'
+                    tab_index = -1
+                    for index in range(self.count()):
+                        if self.tabText(index) == name:
+                            tab_index = index
+                    if tab_index == -1:
+                        new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+                        tab_index = self.addTab(new_tab, name)
+                        draw_colormap(self.file_path, new_tab, channel_name)
+                        self.setCurrentIndex(tab_index)
+                else:
+                    QMessageBox.warning("该文件为频率数据，不展示colormap图")
+            except Exception as e:
+                print(f"文件读取失败: {e}")
+
+
 
     def shishi_show(self):
         self.auto_fill_file_path()
