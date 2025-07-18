@@ -2,7 +2,8 @@ import os
 
 import mplcursors
 import numpy as np
-from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QMessageBox, QInputDialog
+from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QMessageBox, QInputDialog, QDialog, QLabel, QComboBox, \
+    QPushButton
 from PyQt5 import QtCore, QtWidgets
 from matplotlib import cm
 
@@ -29,7 +30,11 @@ class showWidget(QTabWidget):
         self.auto_fill_file_path()
         if self.file_path is None:
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_XY'
+        channel_name = self.choose_channel()
+        if channel_name is None:
+            return
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + '_XY'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
@@ -37,14 +42,18 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget(need_label=True)  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_XY(self.file_path, new_tab, select=True)
+            draw_XY(self.file_path, new_tab, base_name, channel_name)
             self.setCurrentIndex(tab_index)
 
     def draw_Frontback_img(self):
         self.auto_fill_file_path()
         if self.file_path is None:
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_XY'
+        channel_name1, channel_name2 = self.choose_two_channels()
+        if channel_name1 is None or channel_name2 is None:
+            return
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name1 + '_' + channel_name2 + '_frontback'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
@@ -52,7 +61,7 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget(need_label=False)  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_Frontback(self.file_path, new_tab)
+            draw_Frontback(self.file_path, new_tab, base_name, channel_name1, channel_name2)
             self.setCurrentIndex(tab_index)
 
     def draw_waterfall_img(self):
@@ -85,6 +94,25 @@ class showWidget(QTabWidget):
             draw_Bode(self.file_path, new_tab)
             self.setCurrentIndex(tab_index)
 
+    def draw_UL_img(self):
+        self.auto_fill_file_path()
+        if self.file_path is None:
+            return
+        channel_name = self.choose_channel()
+        if channel_name is None:
+            return
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + '_UL'
+        tab_index = -1
+        for index in range(self.count()):
+            if self.tabText(index) == name:
+                tab_index = index
+        if tab_index == -1:
+            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+            tab_index = self.addTab(new_tab, name)
+            draw_UL(self.file_path, new_tab, base_name, channel_name)
+            self.setCurrentIndex(tab_index)
+
     def draw_Nyquist_img(self):
         self.auto_fill_file_path()
         if self.file_path is None:
@@ -115,7 +143,7 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_third_octave_spectrum(self.file_path, new_tab,channel_name)
+            draw_third_octave_spectrum(self.file_path, new_tab, channel_name)
             self.setCurrentIndex(tab_index)
 
     def draw_one_octave_spectrum_img(self):
@@ -133,7 +161,7 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_one_octave_spectrum(self.file_path, new_tab,channel_name)
+            draw_one_octave_spectrum(self.file_path, new_tab, channel_name)
             self.setCurrentIndex(tab_index)
 
     def draw_colormap_img(self):
@@ -161,7 +189,7 @@ class showWidget(QTabWidget):
         name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + 'show'
         new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
         tab_index = self.addTab(new_tab, name)
-        draw_shishishow(self.file_path,new_tab)
+        draw_shishishow(self.file_path, new_tab)
         self.setCurrentIndex(tab_index)
 
     #####################################################################################
@@ -192,9 +220,56 @@ class showWidget(QTabWidget):
         else:
             return None
 
+    def choose_two_channels(self):
+        _, _, channel_names = get_csv_info(self.file_path)
+
+        while True:  # 循环直到选择有效或取消
+            # 创建对话框
+            dialog = QDialog()
+            dialog.setWindowTitle("选择两个通道")
+            dialog.setMinimumWidth(300)
+
+            # 布局和控件
+            layout = QVBoxLayout()
+
+            # 第一个下拉框
+            layout.addWidget(QLabel("选择第一个通道:"))
+            combo1 = QComboBox()
+            combo1.addItems(channel_names)
+            layout.addWidget(combo1)
+
+            # 第二个下拉框
+            layout.addWidget(QLabel("选择第二个通道:"))
+            combo2 = QComboBox()
+            combo2.addItems(channel_names)
+            layout.addWidget(combo2)
+
+            # 按钮组
+            btn_ok = QPushButton("确定")
+            btn_ok.clicked.connect(dialog.accept)
+            layout.addWidget(btn_ok)
+
+            dialog.setLayout(layout)
+
+            dialog.setLayout(layout)
+
+            # 处理选择结果
+            if dialog.exec_() == QDialog.Accepted:
+                channel_name1 = combo1.currentText()
+                channel_name2 = combo2.currentText()
+
+                if channel_name1 == channel_name2:
+                    QMessageBox.warning(self, "无效选择",
+                                        "请选择两个不同的通道！\n"
+                                        f"当前选择: {channel_name1} 和 {channel_name2}")
+                    continue  # 重新循环显示对话框
+                else:
+                    return channel_name1, channel_name2
+            else:
+                return None, None  # 用户取消
+
     def close_showtab(self, index):
         self.removeTab(index)
-
 
     def init_ui(self):
         self.setParent(self.main_window.centralwidget)

@@ -43,6 +43,8 @@ class main_window(QMainWindow, Ui_MainWindow):
         self.actionBode.triggered.connect(self.showWidget.draw_Bode_img)
         # 画Frontback图
         self.actionFrontback.triggered.connect(self.showWidget.draw_Frontback_img)
+        # 画UL图
+        self.actionUL.triggered.connect(self.showWidget.draw_UL_img)
         # 画Nyquist图
         self.actionNyquist.triggered.connect(self.showWidget.draw_Nyquist_img)
         # 画1/3倍频程图

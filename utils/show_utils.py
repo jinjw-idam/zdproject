@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from PyQt5.QtCore import QUrl
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
-from PyQt5.QtWidgets import QFileDialog, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QFileDialog, QWidget, QVBoxLayout, QPushButton
 from matplotlib import cm
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -22,10 +22,12 @@ matplotlib.rc("font", family='Microsoft YaHei')
 import mplcursors
 
 
-def draw_XY(file_path, show_widget: QWidget, select=False):
-    time_list, amplitude_list = get_info(file_path)
+def draw_XY(file_path, show_widget: QWidget, base_name, channel_name):
+    time_list, channel_matrix, channel_names = get_csv_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    channel_data = channel_matrix[channel_index]
     ax = show_widget.figure.add_subplot(111)
-    line = ax.plot(time_list, amplitude_list)
+    line = ax.plot(time_list, channel_data)
     ax.set_title("XY图")
     ax.set_xlabel("时间")
     ax.set_ylabel("幅度")
@@ -35,19 +37,20 @@ def draw_XY(file_path, show_widget: QWidget, select=False):
             f"Time: {sel.target[0]:.2f}\nAmplitude: {sel.target[1]:.2f}"
         )
     )
-    if select:
-        show_widget.span_selector = SpanSelector(
-            ax,
-            lambda xmin, xmax: on_select(show_widget, time_list, amplitude_list, xmin, xmax),
-            'horizontal',
-            useblit=True,
-            props=dict(alpha=0.4, facecolor='yellow'),
-            interactive=True
-        )
-        show_widget.info_output_label.setText(f"时间范围{time_list[0]:.2f}~{time_list[-1]:.2f}\n"
-                                              f"最大值{np.max(amplitude_list):.2f},"
-                                              f"最小值{np.min(amplitude_list):.2f},"
-                                              f"平均值{np.average(amplitude_list):.2f}")
+    show_widget.span_selector = SpanSelector(
+        ax,
+        lambda xmin, xmax: on_select(show_widget, time_list, channel_data, xmin, xmax),
+        'horizontal',
+        useblit=True,
+        props=dict(alpha=0.4, facecolor='yellow'),
+        interactive=True
+    )
+    show_widget.info_output_label.setText(f"时间范围{time_list[0]:.2f}~{time_list[-1]:.2f}\n"
+                                          f"最大值{np.max(channel_data):.2f},"
+                                          f"最小值{np.min(channel_data):.2f},"
+                                          f"平均值{np.average(channel_data):.2f}")
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, channel_name, "XY图"))
     show_widget.canvas.draw()
 
 
@@ -114,12 +117,16 @@ def draw_waterfall(file_path, show_widget: QWidget):
     show_widget.canvas.draw()
 
 
-def draw_Frontback(file_path, show_widget: QWidget):
-    time_list, input_amplitude_list, output_amplitude_list = get_file_info(file_path)
+def draw_Frontback(file_path, show_widget: QWidget, base_name, channel_name1, channel_name2):
+    time_list, channel_matrix, channel_names = get_csv_info(file_path)
+    channel_index1 = channel_names.index(channel_name1)
+    channel_data1 = channel_matrix[channel_index1]
+    channel_index2 = channel_names.index(channel_name2)
+    channel_data2 = channel_matrix[channel_index2]
     ax = show_widget.figure.add_subplot(111)
     ax.clear()
-    line1 = ax.plot(time_list, input_amplitude_list, color='b', linewidth=1.5, label='Front')
-    line2 = ax.plot(time_list, output_amplitude_list, color='r', linewidth=1.5, label='Back')
+    line1 = ax.plot(time_list, channel_data1, color='b', linewidth=1.5, label=channel_name1)
+    line2 = ax.plot(time_list, channel_data2, color='r', linewidth=1.5, label=channel_name2)
     ax.set_title("Frontback图")
     ax.set_xlabel("时间")
     ax.set_ylabel("幅度")
@@ -132,7 +139,7 @@ def draw_Frontback(file_path, show_widget: QWidget):
         x, y = sel.target[0], sel.target[1]
         # 设置注解文本
         sel.annotation.set_text(
-            f"Time: {x:.2f}\nAmplitude: {y:.2f}\nSignal: {'Front' if sel.artist == line1[0] else 'Back'}"
+            f"Time: {x:.2f}\nAmplitude: {y:.2f}\nSignal: {channel_name1 if sel.artist == line1[0] else channel_name2}"
         )
         # 设置注解样式
         sel.annotation.get_bbox_patch().set(fc="white", alpha=0.8)
@@ -140,6 +147,8 @@ def draw_Frontback(file_path, show_widget: QWidget):
     # 绑定回调函数到两个光标
     cursor1.connect("add", update_annotation)
     cursor2.connect("add", update_annotation)
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, channel_name1+'_'+channel_name2, "frontback图"))
     show_widget.canvas.draw()
 
 
@@ -157,6 +166,26 @@ def draw_Bode(file_path, show_widget: QWidget):
     ax2.set_ylabel("相位 (度)")
     ax2.set_xlabel("频率 (rad/s)")
     # 刷新画布
+    show_widget.canvas.draw()
+
+
+def draw_UL(file_path, show_widget: QWidget, base_name, channel_name):
+    time_list, channel_matrix, channel_names = get_csv_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    channel_data = channel_matrix[channel_index]
+    ax = show_widget.figure.add_subplot(111)
+    line = ax.plot(time_list*100,channel_data)
+    ax.set_title("UL图")
+    ax.set_xlabel("转速")
+    ax.set_ylabel("加速度")
+    show_widget.cursor = mplcursors.cursor(line, hover=True)
+    show_widget.cursor.connect(
+        "add", lambda sel: sel.annotation.set_text(
+            f"转速: {sel.target[0]:.2f}\n加速度: {sel.target[1]:.2f}"
+        )
+    )
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, channel_name, "UL图"))
     show_widget.canvas.draw()
 
 
@@ -257,7 +286,7 @@ def draw_shishishow(file_path, show_widget: QWidget):
     show_widget.canvas.draw()
 
 
-def create_show_widget(need_label=False):
+def create_show_widget(need_label=False, need_button=True):
     new_tab = QWidget()  # 创建空白页面（可替换为你的自定义控件）
     new_tab.figure = Figure()
     new_tab.canvas = FigureCanvas(new_tab.figure)
@@ -271,4 +300,23 @@ def create_show_widget(need_label=False):
         new_tab.info_output_label.setText("")
         new_tab.info_output_label.setObjectName("info_output_label")
         new_tab.layout.addWidget(new_tab.info_output_label)  # 将标签添加到布局
+    if need_button:
+        new_tab.save_button = QPushButton()
+        new_tab.save_button.setText("保存")
+        new_tab.save_button.setObjectName("save_button")
+        new_tab.layout.addWidget(new_tab.save_button)  # 将标签添加到布局
     return new_tab
+
+
+def save(figure, base_name, channel_name, img_type):
+    # 构建保存路径
+    save_dir = os.path.join('static', base_name)
+    save_name = channel_name + '_' + img_type + '.png'
+    save_path = os.path.join(save_dir, save_name)
+
+    # 确保目录存在（如果不存在则创建）
+    os.makedirs(save_dir, exist_ok=True)
+
+    # 保存图形
+    figure.savefig(save_path, dpi=300, bbox_inches='tight')
+    print(f"图片已保存至: {save_path}")

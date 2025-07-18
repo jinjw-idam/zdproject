@@ -156,7 +156,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "图像视频物体消除"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "振动监测数据分析"))
 
         self.menu.setTitle(_translate("MainWindow", "文件"))
         self.menu_2.setTitle(_translate("MainWindow", "显示"))

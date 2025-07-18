@@ -173,7 +173,7 @@ class calculateWidget(QTabWidget):
 
         # 创建自定义对话框
         dialog = QDialog()
-        dialog.setWindowTitle("选择两个通道")
+        dialog.setWindowTitle("选择通道和三角函数类型")
 
         # 创建布局和控件
         layout = QVBoxLayout()
