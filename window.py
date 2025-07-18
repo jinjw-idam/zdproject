@@ -77,7 +77,28 @@ class main_window(QMainWindow, Ui_MainWindow):
     def open_file(self):
         uploaded_file_path = QFileDialog.getOpenFileName(None, 'Select File')[0]
         self.uploaded_file_path = uploaded_file_path
-        # self.displayWidget.shishi_show()
+
+        file_path = self.uploaded_file_path
+        if file_path and os.path.exists(file_path):
+            try:
+                # 自动判断文件类型，预读取前几行
+                import pandas as pd
+                if file_path.endswith(".xlsx"):
+                    df = pd.read_excel(file_path)
+                elif file_path.endswith(".csv") or file_path.endswith(".txt"):
+                    df = pd.read_csv(file_path, delimiter=None if file_path.endswith(".csv") else '\t')
+                else:
+                    QMessageBox.warning(self, "错误", "暂不支持的文件格式")
+                    return
+                # 根据列名决定上传接口
+                if {"channel_1", "channel_2", "channel_3"}.issubset(df.columns):
+                    self.displayWidget.shishi_show()
+                else:
+                    print("该文件为频率数据，不展示实时图")
+            except Exception as e:
+                print(f"文件读取失败: {e}")
+
+
 
 
 if __name__ == '__main__':

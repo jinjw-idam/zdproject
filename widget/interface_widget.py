@@ -1,19 +1,19 @@
 import os
-import threading
 import time
-
+import threading
 import pandas as pd
 import requests
-from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox, QPushButton, QLineEdit, QLabel, QTableView, QHeaderView
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QTabWidget, QWidget, QVBoxLayout, QMessageBox
-from PyQt5 import QtWidgets
-# from date_widget import *
 
+from PyQt5.QtWidgets import (
+    QTabWidget, QFileDialog, QMessageBox
+)
+from PyQt5.QtCore import pyqtSignal
 
 
 class interface_widget(QTabWidget):
+    show_message_signal = pyqtSignal(str, str)     # 用于提示信息
+    ask_upload_signal = pyqtSignal(list)           # 用于上传确认
+
     def __init__(self, main_window=None):
         super(interface_widget, self).__init__()
         self.file_path = None
@@ -22,12 +22,18 @@ class interface_widget(QTabWidget):
         self.listening = False
         self.listen_start_time = None
 
+        # 连接信号到槽函数
+        self.show_message_signal.connect(self._show_message_box)
+        self.ask_upload_signal.connect(self._ask_upload)
+
     def listen(self):
         if self.listening:
             QMessageBox.information(self, "提示", "监听已经在进行中")
             return
 
-        file_path, _ = QFileDialog.getOpenFileName(self, "选择模拟发送的 Excel 文件", "", "Excel Files (*.xlsx *.xls)")
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "选择模拟发送的 Excel 文件", "", "Excel Files (*.xlsx *.xls)"
+        )
         if not file_path:
             return
 
@@ -39,7 +45,7 @@ class interface_widget(QTabWidget):
     def send_data_and_monitor(self, file_path):
         self.send_data_from_excel(file_path)
 
-        time.sleep(25)  # 等25秒，不再监听或发送
+        time.sleep(10)  # 等待模拟监听结束
 
         # 触发后端缓存保存
         try:
@@ -63,16 +69,11 @@ class interface_widget(QTabWidget):
             self.saved_files = []
 
         if not self.saved_files:
-            QMessageBox.information(None, "提示", "监听结束，但未检测到保存的文件。")
+            self.show_message_signal.emit("提示", "监听结束，但未检测到保存的文件。")
             return
 
-        files_str = "\n".join(self.saved_files)
-        reply = QMessageBox.question(None, "监听结束",
-                                     f"监听结束，保存了以下文件：\n{files_str}\n是否上传？",
-                                     QMessageBox.Yes | QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
-            self.upload_files()
+        # 触发上传确认对话框
+        self.ask_upload_signal.emit(self.saved_files)
 
     def send_data_from_excel(self, file_path, interval=0.01):
         df = pd.read_excel(file_path, header=None)
@@ -108,6 +109,7 @@ class interface_widget(QTabWidget):
             if not os.path.exists(file_path):
                 QMessageBox.warning(self, "文件不存在", f"{file_path} 不存在，跳过上传")
                 continue
+
             if file_name.startswith("channel"):
                 url = "http://127.0.0.1:5000/upload_path"
             elif file_name.startswith("frequency"):
@@ -115,6 +117,7 @@ class interface_widget(QTabWidget):
             else:
                 QMessageBox.warning(self, "未知文件类型", f"文件 {file_name} 类型未知，跳过")
                 continue
+
             try:
                 res = requests.post(url, json={"file_path": file_path})
                 if res.status_code == 200:
@@ -124,3 +127,13 @@ class interface_widget(QTabWidget):
             except Exception as e:
                 QMessageBox.warning(self, "上传异常", f"{file_name} 上传异常: {e}")
 
+    def _show_message_box(self, title, content):
+        QMessageBox.information(self, title, content)
+
+    def _ask_upload(self, file_list):
+        files_str = "\n".join(file_list)
+        reply = QMessageBox.question(self, "监听结束",
+                                     f"监听结束，保存了以下文件：\n{files_str}\n是否上传？",
+                                     QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.upload_files()
