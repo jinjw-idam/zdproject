@@ -157,6 +157,29 @@ class date_widget(QTabWidget):
             if self.main_window:
                 self.main_window.uploaded_file_path = file_path
                 print(f"全局文件路径已更新为：\n{file_path}")
+                # 实时显示
+
+                if file_path and os.path.exists(file_path):
+                    try:
+                        import pandas as pd
+                        if file_path.endswith(".xlsx"):
+                            df = pd.read_excel(file_path)
+                        elif file_path.endswith(".csv"):
+                            df = pd.read_csv(file_path)
+                        elif file_path.endswith(".txt"):
+                            df = pd.read_csv(file_path, sep='\t')
+                        else:
+                            QMessageBox.warning(self, "错误", "暂不支持的文件格式")
+                            return
+
+                        # 判断是否为通道数据
+                        lower_cols = [col.lower() for col in df.columns]
+                        if {"channel_1", "channel_2", "channel_3"}.issubset(lower_cols):
+                            self.main_window.displayWidget.shishi_show()
+                        else:
+                            print("该文件为频率数据，不展示实时图")
+                    except Exception as e:
+                        print(f"文件读取失败: {e}")
 
     def set_global_path_from_table2(self, index):
         row = index.row()
