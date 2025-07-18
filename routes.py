@@ -57,7 +57,6 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 saved_files = []  # 记录最新保存文件列表，供前端查询
 
 
-
 @routes.route('/')
 def hello():
     return "hello"
@@ -124,6 +123,7 @@ def draw_waterfall():
         print(str(e))
         return '500'
 
+
 def detect_data_type(data_dict):
     keys = set(data_dict.keys())
     if {'frequency', 'magnitude', 'phase'}.issubset(keys):
@@ -132,6 +132,7 @@ def detect_data_type(data_dict):
         return 'channel'
     else:
         return 'unknown'
+
 
 def save_cache_to_file(data_list, dtype):
     global saved_files
@@ -144,6 +145,7 @@ def save_cache_to_file(data_list, dtype):
     df.to_excel(filepath, index=False)
     print(f"Saved {dtype} data to {filepath}")
     saved_files.append(filename)
+
 
 @routes.route('/receive_data', methods=['POST'])
 def receive_data():
@@ -165,6 +167,7 @@ def receive_data():
 
     return jsonify({'status': 'received', 'data_type': dtype}), 200
 
+
 @routes.route('/save_cache_to_file', methods=['GET'])
 def trigger_cache_save():
     global channel_cache, frequency_cache, LAST_RECEIVE_TIME
@@ -175,6 +178,7 @@ def trigger_cache_save():
         frequency_cache = []
         LAST_RECEIVE_TIME = time.time()
     return jsonify({'status': 'cache saved'}), 200
+
 
 @routes.route('/save_file', methods=['GET'])
 def get_saved_files():
@@ -244,8 +248,6 @@ def get_saved_files():
 #     return jsonify({'files': saved_files})
 
 
-
-
 @routes.route('/upload_path', methods=['POST'])
 def upload_by_path():
     try:
@@ -302,6 +304,7 @@ def upload_by_path():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
 @routes.route('/upload_freq_path', methods=['POST'])
 def upload_by_path_fre():
     try:
@@ -326,17 +329,14 @@ def upload_by_path_fre():
         if 'frequency' not in df.columns:
             return jsonify({'error': '缺少必要列：frequency'}), 400
 
-
         freq_list = df['frequency'].tolist()
         mag_list = df['magnitude'].tolist()
         phase_list = df['phase'].tolist()
-
 
         save_path = os.path.join(UPLOAD_DIR, filename)
         if file_path != save_path:
             import shutil
             shutil.copy(file_path, save_path)
-
 
         record = FrequencyData(
             filename=filename,
@@ -381,6 +381,7 @@ def search_all():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @routes.route('/search_all_freq', methods=['GET'])
 def search_all_freq():
     try:
@@ -397,14 +398,13 @@ def search_all_freq():
                 'filename': r.filename,
                 'upload_time': r.upload_time.strftime("%Y-%m-%d %H:%M:%S"),
                 'file_path': r.file_path,
-                'frequency': frequency_list[:3],    # 只返回前三条示例
+                'frequency': frequency_list[:3],  # 只返回前三条示例
                 'magnitude': magnitude_list[:3],
                 'phase': phase_list[:3],
             })
         return jsonify({'data': data}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 @routes.route('/get_file_type', methods=['GET'])
@@ -428,6 +428,7 @@ def get_file_type():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @routes.route('/generate_report', methods=['POST'])
 def generate_report():
     data = request.json
@@ -449,7 +450,6 @@ def generate_report():
     ch1_list = json.loads(record.channel_1_list)
     ch2_list = json.loads(record.channel_2_list)
     ch3_list = json.loads(record.channel_3_list)
-
 
     N = 20
 
@@ -479,7 +479,6 @@ def generate_report():
     freq_plot_path = plot_frequency_spectrum(xf, mag, save_path, f"report_{record.id}_ch1")
     freq_plot_path2 = plot_frequency_spectrum(xf2, mag2, save_path, f"report_{record.id}_ch2")
     freq_plot_path3 = plot_frequency_spectrum(xf3, mag3, save_path, f"report_{record.id}_ch3")
-
 
     doc = DocxTemplate('report_template.docx')
     # 模板上下文
@@ -520,6 +519,7 @@ def generate_report():
     doc.save(output_path)
 
     return jsonify({'message': '报告生成成功', 'file_path': output_path}), 200
+
 
 @routes.route('/generate_and_print_report', methods=['POST'])
 def generate_and_print_report():
@@ -747,8 +747,6 @@ def generate_and_print_freq_report():
         return jsonify({'error': str(e)}), 500
 
 
-
-
 ################################不使用matlab，而使用matplotlib#######################################
 center_freqs_3 = np.array([10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125,
                            160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
@@ -794,8 +792,10 @@ def one_octave_spectrum(data, fs, ref=1e-6):
     return center_freqs_1, levels
 
 
-def get_waterfall_info(file_path, n_segments=20, overlap=0.5):
-    time_list, amplitude_list = get_info(file_path)
+def get_waterfall_info(file_path, channel_name, n_segments=20, overlap=0.5):
+    time_list, channel_matrix, channel_names = get_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    amplitude_list = channel_matrix[channel_index]
     time_array = np.array(time_list)
     amplitude_array = np.array(amplitude_list)
 
@@ -851,7 +851,7 @@ def get_colormap_info(channel_data, fs):
 
     # Zxx 是复数矩阵，取其幅值（dB或线性）
     amplitude = np.abs(Zxx)  # 线性幅值
-    return t_stft,f,amplitude
+    return t_stft, f, amplitude
 
 
 def calculate_cepstrum_routes(channel_data, fs):
@@ -969,5 +969,5 @@ def apply_weighting(data, fs, weighting_type='A'):
     """
     b, a = design_weighting_filter(fs, weighting_type)
     weighted_data = signal.lfilter(b, a, data)
-    f, Pxx = signal.welch(weighted_data, fs, nperseg=fs//2)
+    f, Pxx = signal.welch(weighted_data, fs, nperseg=fs // 2)
     return f, Pxx

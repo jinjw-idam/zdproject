@@ -28,7 +28,7 @@ class showWidget(QTabWidget):
     ##############################XY图#############################################
     def draw_XY_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_channel()
         if channel_name is None:
@@ -47,7 +47,7 @@ class showWidget(QTabWidget):
 
     def draw_Frontback_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name1, channel_name2 = self.choose_two_channels()
         if channel_name1 is None or channel_name2 is None:
@@ -66,24 +66,29 @@ class showWidget(QTabWidget):
 
     def draw_waterfall_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_waterfall'
+        channel_name = self.choose_channel()
+        if channel_name is None:
+            return
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + '_waterfall'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
                 tab_index = index
         if tab_index == -1:
-            new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+            new_tab = create_show_widget(need_label=False)  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_waterfall(self.file_path, new_tab)
+            draw_waterfall(self.file_path, new_tab, base_name, channel_name)
             self.setCurrentIndex(tab_index)
 
     def draw_Bode_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('xlsx'):
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_Bode'
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_Bode'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
@@ -91,12 +96,12 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_Bode(self.file_path, new_tab)
+            draw_Bode(self.file_path, new_tab, base_name)
             self.setCurrentIndex(tab_index)
 
     def draw_UL_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_channel()
         if channel_name is None:
@@ -115,9 +120,10 @@ class showWidget(QTabWidget):
 
     def draw_Nyquist_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('xlsx'):
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_Nyquist'
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_Nyquist'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
@@ -125,17 +131,18 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_Nyquist(self.file_path, new_tab)
+            draw_Nyquist(self.file_path, new_tab, base_name)
             self.setCurrentIndex(tab_index)
 
     def draw_third_octave_spectrum_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_channel()
         if channel_name is None:
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_third_octave_spectrum'
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + '_third_octave_spectrum'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
@@ -143,17 +150,18 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_third_octave_spectrum(self.file_path, new_tab, channel_name)
+            draw_third_octave_spectrum(self.file_path, new_tab, base_name, channel_name)
             self.setCurrentIndex(tab_index)
 
     def draw_one_octave_spectrum_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_channel()
         if channel_name is None:
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_one_octave_spectrum'
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + '_one_octave_spectrum'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
@@ -161,17 +169,18 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_one_octave_spectrum(self.file_path, new_tab, channel_name)
+            draw_one_octave_spectrum(self.file_path, new_tab, base_name, channel_name)
             self.setCurrentIndex(tab_index)
 
     def draw_colormap_img(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_channel()
         if channel_name is None:
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_colormap'
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + '_colormap'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
@@ -179,7 +188,7 @@ class showWidget(QTabWidget):
         if tab_index == -1:
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            draw_colormap(self.file_path, new_tab, channel_name)
+            draw_colormap(self.file_path, new_tab, base_name, channel_name)
             self.setCurrentIndex(tab_index)
 
     def shishi_show(self):
@@ -187,7 +196,7 @@ class showWidget(QTabWidget):
         if self.file_path is None:
             return
         name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + 'show'
-        new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
+        new_tab = create_show_widget(need_button=False)  # 创建空白页面（可替换为你的自定义控件）
         tab_index = self.addTab(new_tab, name)
         draw_shishishow(self.file_path, new_tab)
         self.setCurrentIndex(tab_index)

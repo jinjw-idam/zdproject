@@ -81,8 +81,8 @@ def on_select(widget, time_list, amplitude_list, xmin, xmax):
     widget.canvas.draw()
 
 
-def draw_waterfall(file_path, show_widget: QWidget):
-    X, Y, Z = get_waterfall_info(file_path)
+def draw_waterfall(file_path, show_widget: QWidget, base_name, channel_name):
+    X, Y, Z = get_waterfall_info(file_path,channel_name)
     show_widget.figure.clear()
     ax = show_widget.figure.add_subplot(111, projection='3d')
     # 绘制瀑布图
@@ -113,7 +113,8 @@ def draw_waterfall(file_path, show_widget: QWidget):
     # 调整视角
     ax.view_init(elev=30, azim=-45)
     ax.set_title("瀑布图")
-
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, channel_name, "瀑布图"))
     show_widget.canvas.draw()
 
 
@@ -152,7 +153,7 @@ def draw_Frontback(file_path, show_widget: QWidget, base_name, channel_name1, ch
     show_widget.canvas.draw()
 
 
-def draw_Bode(file_path, show_widget: QWidget):
+def draw_Bode(file_path, show_widget: QWidget,base_name):
     frequency_list, magnitude_list, phase_list = get_bode_info(file_path)
     show_widget.figure.suptitle("Bode图")
     show_widget.figure.clear()
@@ -165,6 +166,8 @@ def draw_Bode(file_path, show_widget: QWidget):
     ax2.set_title("相频特性")
     ax2.set_ylabel("相位 (度)")
     ax2.set_xlabel("频率 (rad/s)")
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, "伯德图"))
     # 刷新画布
     show_widget.canvas.draw()
 
@@ -189,7 +192,7 @@ def draw_UL(file_path, show_widget: QWidget, base_name, channel_name):
     show_widget.canvas.draw()
 
 
-def draw_Nyquist(file_path, show_widget: QWidget):
+def draw_Nyquist(file_path, show_widget: QWidget, base_name):
     frequency_list, magnitude_list, phase_list = get_bode_info(file_path)
     gain_linear = 10 ** (np.array(magnitude_list) / 20)
     phase_rad = np.array(phase_list) * np.pi / 180
@@ -200,10 +203,12 @@ def draw_Nyquist(file_path, show_widget: QWidget):
     ax.set_xlabel('实部')
     ax.set_ylabel('虚部')
     ax.set_title('Nyquist图')
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, "奈奎斯特图"))
     show_widget.canvas.draw()
 
 
-def draw_third_octave_spectrum(file_path, show_widget: QWidget, channel_name):
+def draw_third_octave_spectrum(file_path, show_widget: QWidget, base_name, channel_name):
     time_list, channel_matrix, channel_names = get_csv_info(file_path)
     channel_index = channel_names.index(channel_name)
     channel_data = channel_matrix[channel_index]
@@ -223,10 +228,12 @@ def draw_third_octave_spectrum(file_path, show_widget: QWidget, channel_name):
     # 网格和样式
     ax.grid(axis='y', linestyle='--', alpha=0.7)
     ax.figure.tight_layout()
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, channel_name, "1/3倍频程图"))
     show_widget.canvas.draw()
 
 
-def draw_one_octave_spectrum(file_path, show_widget: QWidget, channel_name):
+def draw_one_octave_spectrum(file_path, show_widget: QWidget, base_name, channel_name):
     time_list, channel_matrix, channel_names = get_csv_info(file_path)
     channel_index = channel_names.index(channel_name)
     channel_data = channel_matrix[channel_index]
@@ -246,10 +253,12 @@ def draw_one_octave_spectrum(file_path, show_widget: QWidget, channel_name):
     # 网格和样式
     ax.grid(axis='y', linestyle='--', alpha=0.7)
     ax.figure.tight_layout()
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, channel_name, "单倍频程图"))
     show_widget.canvas.draw()
 
 
-def draw_colormap(file_path, show_widget: QWidget, channel_name):
+def draw_colormap(file_path, show_widget: QWidget, base_name, channel_name):
     time_list, channel_matrix, channel_names = get_csv_info(file_path)
     channel_index = channel_names.index(channel_name)
     channel_data = channel_matrix[channel_index]
@@ -262,6 +271,8 @@ def draw_colormap(file_path, show_widget: QWidget, channel_name):
     ax.set_ylabel('Frequency (Hz)')
     ax.set_title('Colormap')
     ax.figure.tight_layout()
+    show_widget.save_button.clicked.connect(
+        lambda: save(show_widget.figure, base_name, channel_name, "颜色图"))
     show_widget.canvas.draw()
 
 
