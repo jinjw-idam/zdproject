@@ -193,7 +193,7 @@ class showWidget(QTabWidget):
 
     def shishi_show(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + 'show'
         new_tab = create_show_widget(need_button=False)  # 创建空白页面（可替换为你的自定义控件）

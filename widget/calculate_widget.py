@@ -19,24 +19,28 @@ class calculateWidget(QTabWidget):
         self.init_ui()
         self.tabCloseRequested.connect(self.close_calculatetab)
 
-    def generate_fft(self):
+    def fft_calculate(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
-        name = os.path.splitext(os.path.basename(self.file_path))[0] + '_fft'
+        channel_name = self.choose_one_channel()
+        if channel_name is None:
+            return
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+        name = base_name + '_' + channel_name + '_fft'
         tab_index = -1
         for index in range(self.count()):
             if self.tabText(index) == name:
                 tab_index = index
         if tab_index == -1:
-            new_tab = self.create_fft_widget()  # 创建空白页面（可替换为你的自定义控件）
+            new_tab = create_calculate_widget(need_button=True, need_label=False)  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
-            self.draw_fft(new_tab)
+            draw_fft(self.file_path, new_tab, base_name, channel_name)
             self.setCurrentIndex(tab_index)
 
     def selfcomposed(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_one_channel()
         if channel_name is None:
@@ -55,7 +59,7 @@ class calculateWidget(QTabWidget):
 
     def cepstrum(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_one_channel()
         if channel_name is None:
@@ -77,7 +81,7 @@ class calculateWidget(QTabWidget):
         if self.file_path is None:
             return
         channel_name = self.choose_one_channel()
-        if channel_name is None:
+        if channel_name is None or not self.file_path.endswith('csv'):
             return
         name = os.path.splitext(os.path.basename(self.file_path))[0] + '_' + channel_name + '_mathcalculate'
         tab_index = -1
@@ -92,10 +96,10 @@ class calculateWidget(QTabWidget):
 
     def weight_calculate(self, type):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
         channel_name = self.choose_one_channel()
-        if channel_name is None:
+        if channel_name is None or not self.file_path.endswith('csv'):
             return
         base_name = os.path.splitext(os.path.basename(self.file_path))[0]
         name = base_name + '_' + channel_name + f'_{type}weightcalculate'
@@ -111,9 +115,9 @@ class calculateWidget(QTabWidget):
 
     def trig_calculate(self):
         self.auto_fill_file_path()
-        if self.file_path is None:
+        if self.file_path is None or not self.file_path.endswith('csv'):
             return
-        channel_name,method_type = self.choose_channel_type()
+        channel_name, method_type = self.choose_channel_type()
         if channel_name is None or method_type is None:
             return
         base_name = os.path.splitext(os.path.basename(self.file_path))[0]
@@ -127,30 +131,6 @@ class calculateWidget(QTabWidget):
             tab_index = self.addTab(new_tab, name)
             calculate_trig(self.file_path, new_tab, base_name, channel_name, method_type)
             self.setCurrentIndex(tab_index)
-
-    def create_fft_widget(self):
-        new_tab = QWidget()  # 创建空白页面（可替换为你的自定义控件）
-        new_tab.figure = Figure()
-        new_tab.canvas = FigureCanvas(new_tab.figure)
-        new_tab.layout = QVBoxLayout(new_tab)  # 直接设置布局到 QWidget
-        new_tab.layout.addWidget(new_tab.canvas)  # 添加 Matplotlib 画布
-        new_tab.figure.clear()
-        return new_tab
-
-    def draw_fft(self, widget: QWidget):
-        xf, amplitude_spectrum = fft_analysis(self.main_window.uploaded_file_path)
-        ax = widget.figure.add_subplot(111)
-        line = ax.plot(xf, amplitude_spectrum)
-        ax.set_title("FFT分析图")
-        ax.set_xlabel("频率")
-        ax.set_ylabel("幅度")
-        widget.cursor = mplcursors.cursor(line, hover=True)
-        widget.cursor.connect(
-            "add", lambda sel: sel.annotation.set_text(
-                f"Frequency: {sel.target[0]:.2f}\nAmplitude: {sel.target[1]:.2f}"
-            )
-        )
-        widget.canvas.draw()
 
     def choose_one_channel(self):
         _, _, channel_names = get_csv_info(self.file_path)

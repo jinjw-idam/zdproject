@@ -63,7 +63,7 @@ def hello():
 
 
 @routes.route('/fft_analysis')
-def fft_analysis():
+def fft_routes():
     try:
         # 获取参数，设置默认值
         time = request.args.get('time', 50.0)
@@ -852,6 +852,22 @@ def get_colormap_info(channel_data, fs):
     # Zxx 是复数矩阵，取其幅值（dB或线性）
     amplitude = np.abs(Zxx)  # 线性幅值
     return t_stft, f, amplitude
+
+
+def fft_analysis(file_path,channel_name):
+    time_list, channel_matrix, channel_names = get_info(file_path)
+    channel_index = channel_names.index(channel_name)
+    amplitude_list = channel_matrix[channel_index]
+    np_time_list = np.array(time_list)
+    np_amplitude_list = np.array(amplitude_list)
+    N = len(np_time_list)  # 采样点数
+    T = np_time_list[1] - np_time_list[0]  # 采样间隔(秒)
+    Fs = 1 / T  # 采样频率(Hz)
+
+    yf = fft(np_amplitude_list)  # 复数形式的频谱
+    xf = fftfreq(N, T)[:N // 2]  # 正频率部分
+    amplitude_spectrum = 2 / N * np.abs(yf[0:N // 2])
+    return xf, amplitude_spectrum
 
 
 def calculate_cepstrum_routes(channel_data, fs):

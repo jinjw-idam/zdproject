@@ -54,7 +54,7 @@ class main_window(QMainWindow, Ui_MainWindow):
         # 画colormap图
         self.actionColormap.triggered.connect(self.showWidget.draw_colormap_img)
         # fft计算
-        self.actionfft.triggered.connect(self.calculateWidget.generate_fft)
+        self.actionfft.triggered.connect(self.calculateWidget.fft_calculate)
         # 自谱计算
         self.actionself_composed.triggered.connect(self.calculateWidget.selfcomposed)
         # 倒谱计算

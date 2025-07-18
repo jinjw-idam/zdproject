@@ -11,25 +11,28 @@ from matplotlib.widgets import SpanSelector
 from scipy import signal
 from scipy.fft import fft, fftfreq
 
-from routes import calculate_cepstrum_routes, calculate_all_routes, apply_weighting
+from routes import calculate_cepstrum_routes, calculate_all_routes, apply_weighting, fft_analysis
 from utils.file_utils import *
 
 matplotlib.rc("font", family='Microsoft YaHei')
 import mplcursors
 
 
-def fft_analysis(file_path):
-    time_list, amplitude_list = get_info(file_path)
-    np_time_list = np.array(time_list)
-    np_amplitude_list = np.array(amplitude_list)
-    N = len(np_time_list)  # 采样点数
-    T = np_time_list[1] - np_time_list[0]  # 采样间隔(秒)
-    Fs = 1 / T  # 采样频率(Hz)
-
-    yf = fft(np_amplitude_list)  # 复数形式的频谱
-    xf = fftfreq(N, T)[:N // 2]  # 正频率部分
-    amplitude_spectrum = 2 / N * np.abs(yf[0:N // 2])
-    return xf, amplitude_spectrum
+def draw_fft(file_path, show_widget: QWidget, base_name, channel_name):
+    xf, amplitude_spectrum = fft_analysis(file_path,channel_name)
+    ax = show_widget.figure.add_subplot(111)
+    line = ax.plot(xf, amplitude_spectrum)
+    ax.set_title("FFT分析图")
+    ax.set_xlabel("频率")
+    ax.set_ylabel("幅度")
+    show_widget.cursor = mplcursors.cursor(line, hover=True)
+    show_widget.cursor.connect(
+        "add", lambda sel: sel.annotation.set_text(
+            f"Frequency: {sel.target[0]:.2f}\nAmplitude: {sel.target[1]:.2f}"
+        )
+    )
+    show_widget.save_button.clicked.connect(lambda: save(show_widget.figure, base_name, channel_name, "傅里叶变换"))
+    show_widget.canvas.draw()
 
 
 def calculate_selfcomposed(file_path, show_widget: QWidget, base_name, channel_name):
@@ -145,7 +148,7 @@ def calculate_trig(file_path, show_widget: QWidget, base_name, channel_name, met
     show_widget.canvas.draw()
 
 
-def create_calculate_widget(need_button=False, need_label=False):
+def create_calculate_widget(need_button=True, need_label=False):
     new_tab = QWidget()  # 创建空白页面（可替换为你的自定义控件）
     new_tab.figure = Figure()
     new_tab.canvas = FigureCanvas(new_tab.figure)
