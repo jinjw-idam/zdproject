@@ -3,6 +3,7 @@ import os
 from PyQt5.QtWidgets import QTabWidget, QMessageBox
 from PyQt5 import QtCore, QtWidgets
 
+from utils.display_utils import tcp_display_widget
 from utils.show_utils import create_show_widget, draw_shishishow
 
 
@@ -12,6 +13,7 @@ class displayWidget(QTabWidget):
         self.file_path = None
         self.main_window = main_window
         self.init_ui()
+        self.tcp_show()
         self.tabCloseRequested.connect(self.close_displaytab)
 
     def shishi_show(self):
@@ -27,6 +29,17 @@ class displayWidget(QTabWidget):
             new_tab = create_show_widget()  # 创建空白页面（可替换为你的自定义控件）
             tab_index = self.addTab(new_tab, name)
             draw_shishishow(self.file_path, new_tab)
+        self.setCurrentIndex(tab_index)
+
+    def tcp_show(self):
+        name = 'TCP_show'
+        tab_index = -1
+        for index in range(self.count()):
+            if self.tabText(index) == name:
+                tab_index = index
+        if tab_index == -1:
+            new_tab = tcp_display_widget()  # 创建空白页面（可替换为你的自定义控件）
+            tab_index = self.addTab(new_tab, name)
         self.setCurrentIndex(tab_index)
 
     def auto_fill_file_path(self):
